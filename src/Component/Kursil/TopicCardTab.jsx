@@ -1,6 +1,6 @@
 // src/Component/Kursil/TopicCardTab.jsx
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardBody, Row, Col, Button, Alert, Nav, NavItem, NavLink, TabContent, TabPane, Accordion, AccordionItem, AccordionHeader, AccordionBody } from 'reactstrap';
+import { Card, CardHeader, CardBody, CardFooter, Row, Col, Button, Alert, Nav, NavItem, NavLink, TabContent, TabPane, Accordion, AccordionItem, AccordionHeader, AccordionBody, Progress } from 'reactstrap';
 import { H5, P } from '../../AbstractElements';
 import styled from 'styled-components';
 import axios from 'axios';
@@ -17,6 +17,8 @@ const StyledUl = styled.ul`
 
 const TopicCardTab = ({ topic }) => {
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressMessage, setProgressMessage] = useState('');
   const [elaborated, setElaborated] = useState(false);
   const [promptingLoading, setPromptingLoading] = useState(false);
   const [contentLoading, setContentLoading] = useState(false);
@@ -58,37 +60,91 @@ const TopicCardTab = ({ topic }) => {
     setLoading(false);
   };
 
-const handlePrompting = async () => {
-  setPromptingLoading(true);
+  const handlePrompting = async () => {
+    setPromptingLoading(true);
+    setProgress(0);
+    setProgressMessage('');
+
+    try {
+      const response = await fetch(`http://localhost:8000/api/generate-topic-prompting`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topic_id: topic._id }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        console.log('Received chunk:', chunk); // Log the raw chunk
+
+        const lines = chunk.split('\n\n');
+
+        for (const line of lines) {
+          if (line.trim() !== '') {
+            try {
+              const [eventField, dataField] = line.split('\n');
+              const eventType = eventField.replace('event: ', '').trim();
+              const data = JSON.parse(dataField.replace('data: ', '').trim());
+
+              console.log('Parsed event:', eventType, 'data:', data); // Log parsed event and data
+
+              if (eventType === 'progress') {
+                setProgress(data.progress);
+                setProgressMessage(data.message);
+              } else if (eventType === 'complete') {
+                setPromptingLoading(false);
+                showAlert('Prompting generation completed', 'success');
+                break;
+              }
+            } catch (parseError) {
+              console.error('Error parsing SSE data:', parseError, 'Line:', line);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      setPromptingLoading(false);
+      showAlert(`Error generating prompting summaries: ${error.message}`, 'danger');
+      console.error('Error:', error);
+    }
+  };
+
+const fetchPointsDiscussion = async () => {
   try {
-    const response = await axios.post('http://localhost:8000/api/generate-topic-prompting', {
+    const response = await axios.get(`http://localhost:8000/api/points-discussion/${topic._id}`);
+    setPointsDiscussion(response.data);
+  } catch (error) {
+    console.error('Error fetching points of discussion:', error);
+    showAlert('Error fetching updated points of discussion', 'danger');
+  }
+};
+
+const handleHandout = async () => {
+  setContentLoading(true);
+  try {
+    const response = await axios.post('http://localhost:8000/api/generate-topic-handout', {
       topic_id: topic._id
     });
     showAlert(response.data.message, 'success');
-    // Fetch updated points discussion after prompting generation
-    const updatedPointsDiscussion = await axios.get(`http://localhost:8000/api/points-discussion/${topic._id}`);
-    setPointsDiscussion(updatedPointsDiscussion.data);
+    // Fetch updated points discussion after handout generation
+    await fetchPointsDiscussion();
   } catch (error) {
-    console.error('Error generating prompting summaries:', error);
-    showAlert('Error generating prompting summaries', 'danger');
+    console.error('Error generating handout:', error);
+    showAlert('Error generating handout', 'danger');
   }
-  setPromptingLoading(false);
+  setContentLoading(false);
 };
-
-  const handleContent = async () => {
-    setContentLoading(true);
-    try {
-      const response = await axios.post('http://localhost:8000/api/generate-content', {
-        topic_id: topic._id
-      });
-      setPointsDiscussion(response.data.generated_content);
-      showAlert('Content generated successfully!', 'success');
-    } catch (error) {
-      console.error('Error generating content:', error);
-      showAlert('Error generating content', 'danger');
-    }
-    setContentLoading(false);
-  };
 
   const showAlert = (message, color) => {
     setAlert({ visible: true, message, color });
@@ -366,8 +422,8 @@ const handlePrompting = async () => {
                 <Button color="secondary" className="mb-2 w-100" onClick={handlePrompting} disabled={promptingLoading}>
                   {promptingLoading ? 'Generating...' : 'Prompting'}
                 </Button>
-                <Button color="info" className="mb-2 w-100" onClick={handleContent} disabled={contentLoading}>
-                  {contentLoading ? 'Generating...' : 'Content'}
+                <Button color="info" className="mb-2 w-100" onClick={handleHandout} disabled={contentLoading}>
+                  {contentLoading ? 'Generating...' : 'Handout'}
                 </Button>
                 <Button color="warning" className="mb-2 w-100">Evaluation</Button>
                 <Button color="success" className="mb-2 w-100">Outline</Button>
@@ -382,6 +438,16 @@ const handlePrompting = async () => {
           </Alert>
         )}
       </CardBody>
+      <CardFooter>
+        {promptingLoading && (
+          <div>
+            <Progress value={progress} className="mb-3">
+              {Math.round(progress)}%
+            </Progress>
+            <P className="text-center">{progressMessage}</P>
+          </div>
+        )}
+      </CardFooter>
     </Card>
   );
 };

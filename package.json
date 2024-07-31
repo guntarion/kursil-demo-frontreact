@@ -134,7 +134,7 @@
       }
     ],
     "reportUnusedDisableDirectives": true,
-    "noInlineConfig": true
+    "noInlineConfig": false
   },
   "browserslist": [
     ">0.2%",
