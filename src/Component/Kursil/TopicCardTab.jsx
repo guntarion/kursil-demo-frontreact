@@ -1,5 +1,5 @@
 // src/Component/Kursil/TopicCardTab.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardBody, CardFooter, Row, Col, Button, Alert, Nav, NavItem, NavLink, TabContent, TabPane, Accordion, AccordionItem, AccordionHeader, AccordionBody, Progress } from 'reactstrap';
 import { H5, P } from '../../AbstractElements';
 import styled from 'styled-components';
@@ -29,42 +29,88 @@ const Loader = styled.div`
   }
 `;
 
-
 const TopicCardTab = ({ topic }) => {
-  const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [miscLoading, setMiscLoading] = useState(false);
-  const [quizLoading, setQuizLoading] = useState(false);
+  const [currentActivity, setCurrentActivity] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
   const [timerId, setTimerId] = useState(null);
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
-  const [elaborated, setElaborated] = useState(false);
+  const [elaborateLoading, setElaborateLoading] = useState(false);
   const [promptingLoading, setPromptingLoading] = useState(false);
   const [contentLoading, setContentLoading] = useState(false);
-  const [alert, setAlert] = useState({ visible: false, message: '', color: 'success' });
+  const [miscLoading, setMiscLoading] = useState(false);
+  const [quizLoading, setQuizLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('1');
   const [pointsDiscussion, setPointsDiscussion] = useState([]);
   const [openAccordion, setOpenAccordion] = useState(null);
+  const [alert, setAlert] = useState({ visible: false, message: '', color: 'success' });
+
+  const showAlert = useCallback((message, color) => {
+    setAlert({ visible: true, message, color });
+    setTimeout(() => setAlert({ visible: false, message: '', color: 'success' }), 5000);
+  }, []);
+
+  const fetchPointsDiscussion = useCallback(async (showUpdateAlert = false) => {
+    try {
+      const response = await axios.get(`http://localhost:8000/api/points-discussion/${topic._id}`);
+      setPointsDiscussion(response.data);
+      if (showUpdateAlert) {
+        showAlert('Points of discussion updated successfully', 'success');
+      }
+    } catch (error) {
+      console.error('Error fetching points of discussion:', error);
+      showAlert(`Error fetching ${showUpdateAlert ? 'updated ' : ''}points of discussion`, 'danger');
+    }
+  }, [topic._id, showAlert]);
 
   useEffect(() => {
-
-    const fetchPointsDiscussion = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8000/api/points-discussion/${topic._id}`);
-        setPointsDiscussion(response.data);
-        setElaborated(response.data.some(point => point.elaboration));
-      } catch (error) {
-        console.error('Error fetching points of discussion:', error);
-        showAlert('Error fetching points of discussion', 'danger');
-      }
-    };
-
     fetchPointsDiscussion();
-  }, [topic._id]);
+  }, [fetchPointsDiscussion]);
+
+  const startStopwatch = () => {
+    const id = setInterval(() => {
+      setElapsedTime((prevTime) => prevTime + 1);
+    }, 1000);
+    setTimerId(id);
+  };
+
+  const stopStopwatch = () => {
+    if (timerId) {
+      clearInterval(timerId);
+      setTimerId(null);
+    }
+    setElapsedTime(0);
+    setCurrentActivity('');
+  };
+
+  const handleOperation = async (operation, loadingSetter, activityName, apiEndpoint) => {
+    setIsLoading(true);
+    loadingSetter(true);
+    setCurrentActivity(activityName);
+    startStopwatch();
+
+    try {
+      const response = await axios.post(`http://localhost:8000/api/${apiEndpoint}`, {
+        topic_id: topic._id
+      });
+      showAlert(response.data.message, 'success');
+      await fetchPointsDiscussion(true);
+    } catch (error) {
+      console.error(`Error ${operation}:`, error);
+      showAlert(`Error ${operation}`, 'danger');
+    }
+
+    loadingSetter(false);
+    setIsLoading(false);
+    stopStopwatch();
+  };
 
   const handleElaborate = async () => {
-    setLoading(true);
+    setIsLoading(true);
+    setElaborateLoading(true);
+    setCurrentActivity('Elaborating Points');
+    startStopwatch();
     try {
       const response = await axios.post('http://localhost:8000/api/elaborate-points', {
         topic: topic.topic_name,
@@ -72,19 +118,24 @@ const TopicCardTab = ({ topic }) => {
         points_of_discussion: topic.point_of_discussion
       });
       setPointsDiscussion(response.data.elaborated_points);
-      setElaborated(true);
+      await fetchPointsDiscussion(true);
       showAlert('Points elaborated successfully!', 'success');
     } catch (error) {
       console.error('Error elaborating points:', error);
       showAlert('Error elaborating points', 'danger');
     }
-    setLoading(false);
+    setElaborateLoading(false);
+    setIsLoading(false);
+    stopStopwatch();
   };
 
   const handlePrompting = async () => {
+    setIsLoading(true);
     setPromptingLoading(true);
     setProgress(0);
     setProgressMessage('');
+    setCurrentActivity('Generating Prompting');
+    startStopwatch();
 
     try {
       const response = await fetch(`http://localhost:8000/api/generate-topic-prompting`, {
@@ -107,7 +158,7 @@ const TopicCardTab = ({ topic }) => {
         if (done) break;
 
         const chunk = decoder.decode(value);
-        console.log('Received chunk:', chunk); // Log the raw chunk
+        console.log('Received chunk:', chunk);
 
         const lines = chunk.split('\n\n');
 
@@ -118,13 +169,13 @@ const TopicCardTab = ({ topic }) => {
               const eventType = eventField.replace('event: ', '').trim();
               const data = JSON.parse(dataField.replace('data: ', '').trim());
 
-              console.log('Parsed event:', eventType, 'data:', data); // Log parsed event and data
+              console.log('Parsed event:', eventType, 'data:', data);
 
               if (eventType === 'progress') {
                 setProgress(data.progress);
                 setProgressMessage(data.message);
               } else if (eventType === 'complete') {
-                setPromptingLoading(false);
+                await fetchPointsDiscussion(true);
                 showAlert('Prompting generation completed', 'success');
                 break;
               }
@@ -135,104 +186,18 @@ const TopicCardTab = ({ topic }) => {
         }
       }
     } catch (error) {
-      setPromptingLoading(false);
       showAlert(`Error generating prompting summaries: ${error.message}`, 'danger');
       console.error('Error:', error);
     }
+
+    setPromptingLoading(false);
+    setIsLoading(false);
+    stopStopwatch();
   };
 
-const fetchPointsDiscussion = async () => {
-  try {
-    const response = await axios.get(`http://localhost:8000/api/points-discussion/${topic._id}`);
-    setPointsDiscussion(response.data);
-  } catch (error) {
-    console.error('Error fetching points of discussion:', error);
-    showAlert('Error fetching updated points of discussion', 'danger');
-  }
-};
-
-const startStopwatch = () => {
-  const id = setInterval(() => {
-    setElapsedTime((prevTime) => prevTime + 1);
-  }, 1000);
-  setTimerId(id);
-};
-
-const stopStopwatch = () => {
-  if (timerId) {
-    clearInterval(timerId);
-    setTimerId(null);
-  }
-  setElapsedTime(0);
-};
-
-const handleHandout = async () => {
-  setIsLoading(true);
-  setContentLoading(true);
-  startStopwatch();
-  try {
-    const response = await axios.post('http://localhost:8000/api/generate-topic-handout', {
-      topic_id: topic._id
-    });
-    showAlert(response.data.message, 'success');
-    // Fetch updated points discussion after handout generation
-    await fetchPointsDiscussion();
-  } catch (error) {
-    console.error('Error generating handout:', error);
-    showAlert('Error generating handout', 'danger');
-  }
-  setContentLoading(false);
-  setIsLoading(false);
-  stopStopwatch();
-};
-
-const handleMiscPoints = async () => {
-  setIsLoading(true);
-  setMiscLoading(true);
-  startStopwatch();
-
-  try {
-    const response = await axios.post('http://localhost:8000/api/generate-topic-misc', {
-      topic_id: topic._id
-    });
-    showAlert(response.data.message, 'success');
-    await fetchPointsDiscussion();
-  } catch (error) {
-    console.error('Error generating misc points:', error);
-    showAlert('Error generating misc points', 'danger');
-  }
-
-  setMiscLoading(false);
-  setIsLoading(false);
-  stopStopwatch();
-};
-
-const handleQuizGeneration = async () => {
-  setIsLoading(true);
-  setQuizLoading(true);
-  startStopwatch();
-
-  try {
-    const response = await axios.post('http://localhost:8000/api/generate-topic-quiz', {
-      topic_id: topic._id
-    });
-    showAlert(response.data.message, 'success');
-    await fetchPointsDiscussion();
-  } catch (error) {
-    console.error('Error generating quiz:', error);
-    showAlert('Error generating quiz', 'danger');
-  }
-
-  setQuizLoading(false);
-  setIsLoading(false);
-  stopStopwatch();
-};
-
-
-  const showAlert = (message, color) => {
-    setAlert({ visible: true, message, color });
-    setTimeout(() => setAlert({ visible: false, message: '', color: 'success' }), 5000);
-  };
+  const handleHandout = () => handleOperation('generating handout', setContentLoading, 'Generating Handout', 'generate-topic-handout');
+  const handleMiscPoints = () => handleOperation('generating misc points', setMiscLoading, 'Generating Objective - Method - Duration', 'generate-topic-misc');
+  const handleQuizGeneration = () => handleOperation('generating quiz', setQuizLoading, 'Generating Quiz', 'generate-topic-quiz');
 
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -241,6 +206,21 @@ const handleQuizGeneration = async () => {
   const toggleAccordion = (id) => {
     setOpenAccordion(openAccordion === id ? null : id);
   };
+
+  const renderAccordion = (content, contentKey) => (
+    <Accordion open={openAccordion} toggle={toggleAccordion}>
+      {pointsDiscussion.map((point, index) => (
+        <AccordionItem key={index}>
+          <AccordionHeader targetId={`${contentKey}${index}`}>{point.point_of_discussion}</AccordionHeader>
+          <AccordionBody accordionId={`${contentKey}${index}`}>
+            <Markdown>
+              {point[contentKey] || `No ${contentKey} content available.`}
+            </Markdown>
+          </AccordionBody>
+        </AccordionItem>
+      ))}
+    </Accordion>
+  );
 
   return (
     <Card className="mb-4">
@@ -252,71 +232,16 @@ const handleQuizGeneration = async () => {
         <Row>
           <Col md="3">
             <Nav vertical pills>
-              <NavItem>
-                <NavLink className={activeTab === '1' ? 'active' : ''} onClick={() => toggle('1')}>
-                  Overview
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '2' ? 'active' : ''} onClick={() => toggle('2')}>
-                  Elaboration
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '3' ? 'active' : ''} onClick={() => toggle('3')}>
-                  Prompting
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '4' ? 'active' : ''} onClick={() => toggle('4')}>
-                  Handout
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '5' ? 'active' : ''} onClick={() => toggle('5')}>
-                  Learning Objective
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '6' ? 'active' : ''} onClick={() => toggle('6')}>
-                  Assessment
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '7' ? 'active' : ''} onClick={() => toggle('7')}>
-                  Method
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '8' ? 'active' : ''} onClick={() => toggle('8')}>
-                  Quiz
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '9' ? 'active' : ''} onClick={() => toggle('9')}>
-                  Studi Kasus
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '10' ? 'active' : ''} onClick={() => toggle('10')}>
-                  Bahan Diskusi
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '11' ? 'active' : ''} onClick={() => toggle('11')}>
-                  Outline Presentasi
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '12' ? 'active' : ''} onClick={() => toggle('12')}>
-                  Script Bicara
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink className={activeTab === '13' ? 'active' : ''} onClick={() => toggle('13')}>
-                  Actions
-                </NavLink>
-              </NavItem>
+              {['Overview', 'Elaboration', 'Prompting', 'Handout', 'Learning Objective', 'Assessment', 'Method', 'Quiz', 'Studi Kasus', 'Bahan Diskusi', 'Outline Presentasi', 'Script Bicara', 'Actions'].map((item, index) => (
+                <NavItem key={index}>
+                  <NavLink
+                    className={activeTab === `${index + 1}` ? 'active' : ''}
+                    onClick={() => toggle(`${index + 1}`)}
+                  >
+                    {item}
+                  </NavLink>
+                </NavItem>
+              ))}
             </Nav>
           </Col>
           <Col md="9">
@@ -333,174 +258,20 @@ const handleQuizGeneration = async () => {
                   ))}
                 </StyledUl>
               </TabPane>
-              <TabPane tabId="2">
-                <H5>Elaborations</H5>
-                <Accordion open={openAccordion} toggle={toggleAccordion}>
-                  {pointsDiscussion.map((point, index) => (
-                    <AccordionItem key={index}>
-                      <AccordionHeader targetId={index.toString()}>{point.point_of_discussion}</AccordionHeader>
-                      <AccordionBody accordionId={index.toString()}>
-                        <Markdown>{point.elaboration || "No elaboration available."}</Markdown>
-                      </AccordionBody>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </TabPane>
-              <TabPane tabId="3">
-                <H5>Prompting</H5>
-                <Accordion open={openAccordion} toggle={toggleAccordion}>
-                  {pointsDiscussion.map((point, index) => (
-                    <AccordionItem key={index}>
-                      <AccordionHeader targetId={`p${index}`}>{point.point_of_discussion}</AccordionHeader>
-                      <AccordionBody accordionId={`p${index}`}>
-                        <Markdown>
-                            {point.prompting || "No prompting available."}
-                          </Markdown>
-                      </AccordionBody>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </TabPane>
-              <TabPane tabId="4">
-                <H5>Output Content</H5>
-                <Accordion open={openAccordion} toggle={toggleAccordion}>
-                  {pointsDiscussion.map((point, index) => (
-                    <AccordionItem key={index}>
-                      <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
-                      <AccordionBody accordionId={`h${index}`}>
-                        <Markdown>
-                          {point.handout || "No handout content available."}
-                        </Markdown>
-                      </AccordionBody>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </TabPane>
-
-              <TabPane tabId="5">
-                <H5>Output Content</H5>
-                <Accordion open={openAccordion} toggle={toggleAccordion}>
-                  {pointsDiscussion.map((point, index) => (
-                    <AccordionItem key={index}>
-                      <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
-                      <AccordionBody accordionId={`h${index}`}>
-                        <Markdown>
-                          {point.learn_objective || "No learn_objective content available."}
-                        </Markdown>
-                      </AccordionBody>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </TabPane>
-              <TabPane tabId="6">
-                <H5>Output Content</H5>
-                <Accordion open={openAccordion} toggle={toggleAccordion}>
-                  {pointsDiscussion.map((point, index) => (
-                    <AccordionItem key={index}>
-                      <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
-                      <AccordionBody accordionId={`h${index}`}>
-                        <Markdown>
-                          {point.assessment || "No assessment content available."}
-                        </Markdown>
-                      </AccordionBody>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </TabPane>
-              <TabPane tabId="7">
-                <H5>Output Content</H5>
-                <Accordion open={openAccordion} toggle={toggleAccordion}>
-                  {pointsDiscussion.map((point, index) => (
-                    <AccordionItem key={index}>
-                      <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
-                      <AccordionBody accordionId={`h${index}`}>
-                        <Markdown>
-                          {point.method || "No method content available."}
-                        </Markdown>
-                      </AccordionBody>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </TabPane>
-              <TabPane tabId="8">
-                      <H5>Output Content</H5>
-                      <Accordion open={openAccordion} toggle={toggleAccordion}>
-                        {pointsDiscussion.map((point, index) => (
-                          <AccordionItem key={index}>
-                            <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
-                            <AccordionBody accordionId={`h${index}`}>
-                              <Markdown>
-                                {point.quiz || "No quiz content available."}
-                              </Markdown>
-                            </AccordionBody>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
-                    </TabPane>
-              <TabPane tabId="9">
-                    <H5>Output Content</H5>
-                    <Accordion open={openAccordion} toggle={toggleAccordion}>
-                      {pointsDiscussion.map((point, index) => (
-                        <AccordionItem key={index}>
-                          <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
-                          <AccordionBody accordionId={`h${index}`}>
-                            <Markdown>
-                              {point.casestudy || "No casestudy content available."}
-                            </Markdown>
-                          </AccordionBody>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </TabPane>
-              <TabPane tabId="10">
-                    <H5>Output Content</H5>
-                    <Accordion open={openAccordion} toggle={toggleAccordion}>
-                      {pointsDiscussion.map((point, index) => (
-                        <AccordionItem key={index}>
-                          <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
-                          <AccordionBody accordionId={`h${index}`}>
-                            <Markdown>
-                              {point.discussion || "No discussion content available."}
-                            </Markdown>
-                          </AccordionBody>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </TabPane>
-              <TabPane tabId="11">
-                    <H5>Output Content</H5>
-                    <Accordion open={openAccordion} toggle={toggleAccordion}>
-                      {pointsDiscussion.map((point, index) => (
-                        <AccordionItem key={index}>
-                          <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
-                          <AccordionBody accordionId={`h${index}`}>
-                            <Markdown>
-                              {point.outline || "No outline content available."}
-                            </Markdown>
-                          </AccordionBody>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </TabPane>
-              <TabPane tabId="12">
-                    <H5>Output Content</H5>
-                    <Accordion open={openAccordion} toggle={toggleAccordion}>
-                      {pointsDiscussion.map((point, index) => (
-                        <AccordionItem key={index}>
-                          <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
-                          <AccordionBody accordionId={`h${index}`}>
-                            <Markdown>
-                              {point.script || "No script available."}
-                            </Markdown>
-                          </AccordionBody>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </TabPane>                  
-
+              <TabPane tabId="2">{renderAccordion('elaboration', 'elaboration')}</TabPane>
+              <TabPane tabId="3">{renderAccordion('prompting', 'prompting')}</TabPane>
+              <TabPane tabId="4">{renderAccordion('handout', 'handout')}</TabPane>
+              <TabPane tabId="5">{renderAccordion('learn_objective', 'learn_objective')}</TabPane>
+              <TabPane tabId="6">{renderAccordion('assessment', 'assessment')}</TabPane>
+              <TabPane tabId="7">{renderAccordion('method', 'method')}</TabPane>
+              <TabPane tabId="8">{renderAccordion('quiz', 'quiz')}</TabPane>
+              <TabPane tabId="9">{renderAccordion('casestudy', 'casestudy')}</TabPane>
+              <TabPane tabId="10">{renderAccordion('discussion', 'discussion')}</TabPane>
+              <TabPane tabId="11">{renderAccordion('outline', 'outline')}</TabPane>
+              <TabPane tabId="12">{renderAccordion('script', 'script')}</TabPane>
               <TabPane tabId="13">
-                <Button color="primary" className="mb-2 w-100" onClick={handleElaborate} disabled={loading || elaborated}>
-                  {loading ? 'Elaborating...' : elaborated ? 'Elaborated' : 'Elaborate'}
+                <Button color="primary" className="mb-2 w-100" onClick={handleElaborate} disabled={elaborateLoading}>
+                  {elaborateLoading ? 'Generating...' : 'Elaborate'}
                 </Button>
                 <Button color="secondary" className="mb-2 w-100" onClick={handlePrompting} disabled={promptingLoading}>
                   {promptingLoading ? 'Generating...' : 'Prompting'}
@@ -529,7 +300,7 @@ const handleQuizGeneration = async () => {
         {isLoading && (
           <div className="d-flex flex-column align-items-center">
             <Loader className="mb-2" />
-            <P>Time elapsed: {elapsedTime} seconds</P>
+            <P>{currentActivity} | Time elapsed: {elapsedTime} seconds</P>
           </div>
         )}
         {promptingLoading && (
