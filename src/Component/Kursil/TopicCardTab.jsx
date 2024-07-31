@@ -58,20 +58,22 @@ const TopicCardTab = ({ topic }) => {
     setLoading(false);
   };
 
-  const handlePrompting = async () => {
-    setPromptingLoading(true);
-    try {
-      const response = await axios.post('http://localhost:8000/api/generate-prompting-and-content', {
-        topic_id: topic._id
-      });
-      setPointsDiscussion(response.data.prompting_summaries);
-      showAlert('Prompting summaries generated successfully!', 'success');
-    } catch (error) {
-      console.error('Error generating prompting summaries:', error);
-      showAlert('Error generating prompting summaries', 'danger');
-    }
-    setPromptingLoading(false);
-  };
+const handlePrompting = async () => {
+  setPromptingLoading(true);
+  try {
+    const response = await axios.post('http://localhost:8000/api/generate-topic-prompting', {
+      topic_id: topic._id
+    });
+    showAlert(response.data.message, 'success');
+    // Fetch updated points discussion after prompting generation
+    const updatedPointsDiscussion = await axios.get(`http://localhost:8000/api/points-discussion/${topic._id}`);
+    setPointsDiscussion(updatedPointsDiscussion.data);
+  } catch (error) {
+    console.error('Error generating prompting summaries:', error);
+    showAlert('Error generating prompting summaries', 'danger');
+  }
+  setPromptingLoading(false);
+};
 
   const handleContent = async () => {
     setContentLoading(true);
@@ -133,42 +135,42 @@ const TopicCardTab = ({ topic }) => {
               </NavItem>
               <NavItem>
                 <NavLink className={activeTab === '5' ? 'active' : ''} onClick={() => toggle('5')}>
-                  learn_objective
+                  Learning Objective
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink className={activeTab === '6' ? 'active' : ''} onClick={() => toggle('6')}>
-                  assessment
+                  Assessment
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink className={activeTab === '7' ? 'active' : ''} onClick={() => toggle('7')}>
-                  method
+                  Method
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink className={activeTab === '8' ? 'active' : ''} onClick={() => toggle('8')}>
-                  quiz
+                  Quiz
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink className={activeTab === '9' ? 'active' : ''} onClick={() => toggle('9')}>
-                  casestudy
+                  Studi Kasus
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink className={activeTab === '10' ? 'active' : ''} onClick={() => toggle('10')}>
-                  discussion
+                  Bahan Diskusi
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink className={activeTab === '11' ? 'active' : ''} onClick={() => toggle('11')}>
-                  outline
+                  Outline Presentasi
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink className={activeTab === '12' ? 'active' : ''} onClick={() => toggle('12')}>
-                  and script
+                  Script Bicara
                 </NavLink>
               </NavItem>
               <NavItem>
@@ -349,7 +351,7 @@ const TopicCardTab = ({ topic }) => {
                           <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
                           <AccordionBody accordionId={`h${index}`}>
                             <Markdown>
-                              {point.and || "No and content available."}
+                              {point.script || "No script available."}
                             </Markdown>
                           </AccordionBody>
                         </AccordionItem>
