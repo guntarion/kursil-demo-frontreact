@@ -1,0 +1,309 @@
+/**=====================
+    13. Form CSS Start
+==========================**/
+form{
+  &.form.theme-form{
+    input[type="file"]{
+      padding: 6px 12px;
+    }
+  }
+  &.was-validated{
+    .custom-file{
+      label{
+        display: none;
+      }
+    }
+    .custom-control{
+      label{
+        margin-left: 6px;
+      }
+    }
+  }
+  &.needs-validation {
+    .row {
+      input {
+        ~ span {
+          color: $danger-color;
+        }
+      }
+    }
+    .input-group {
+      span {
+        width: 100%;
+      }
+      span.input-group-text{
+        width: auto;
+      }
+    }
+    &.tooltip-validation {
+      &.validateClass {
+        .row {
+          input {
+            ~ span {
+              padding: 0.25rem 0.5rem;
+              margin-top: 0.1rem;
+              font-size: 0.875rem;
+              line-height: 1.5;
+              color: $white;
+              background-color: rgba($danger-color, 0.9);
+              border-radius: 0.25rem;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+.form-space {
+  margin-bottom: -10px;
+  > div {
+    margin-bottom: 10px;
+  }
+}
+.form-control {
+  &:focus {
+    box-shadow: none;
+    border: 1px solid #ced4da;
+  }
+  &::-webkit-input-placeholder {
+    color: $dark-gray !important;
+    font-weight: 400 !important;
+  }
+}
+input[type="textarea"]{
+  &.form-control{
+    border: 1px solid $light-semi-gray;
+  }
+}
+.theme-form {
+  .form-group {
+    margin-bottom: 20px;
+  }
+  label {
+    font-weight: 500;
+  }
+  .btn.btn-primary {
+    z-index: 0;
+  }
+  textarea {
+    border-color: $form-input-border-color;
+    &::-webkit-input-placeholder {
+      color: $form-placeholder-color;
+      font-size: $form-placeholder-font-size;
+      letter-spacing: $form-placeholder-letter-spacing;
+      font-weight: $form-placeholder-font-weight;
+    }
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="search"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"],
+  input[type="url"],
+  input[type="file"],
+  textarea,
+  select {
+    border-color: $form-input-border-color;
+    background-color: $form-input-bg-color;
+    font-size: $form-placeholder-font-size;
+    color: $form-placeholder-color;
+    padding: 12px 10px;
+    &::-webkit-input-placeholder {
+      color: $form-placeholder-color;
+      font-size: $form-placeholder-font-size;
+      letter-spacing: $form-placeholder-letter-spacing;
+      font-weight: $form-placeholder-font-weight;
+    }
+  }
+  input[type="file"] {
+    height: auto;
+  }
+  select.form-control:not([size]):not([multiple]) {
+    border-color: $form-input-border-color;
+    font-size: $form-placeholder-font-size;
+  }
+  .checkbox {
+    label {
+      padding-left: 10px;
+    }
+  }
+  .btn-fb,
+  .btn-twitter,
+  .btn-google,
+  .btn-linkedin {
+    color: $white;
+    width: 100%;
+  }
+  .btn-fb {
+    background-color: $fb;
+  }
+  .btn-twitter {
+    background-color: $twitter;
+  }
+  .btn-google {
+    background-color: $google-plus;
+  }
+  .btn-linkedin {
+    background-color: $linkedin;
+  }
+}
+.form-inline {
+  display: flex;
+  flex: 0 0 auto;
+  flex-flow: row wrap;
+  align-items: center;
+  margin-bottom: 0;
+  .col-form-label {
+    margin-right: 5px;
+  }
+}
+.search-form {
+  .form-group {
+    &:before {
+      position: absolute;
+      content: "";
+      width: 1px;
+      height: 25px;
+      background: #e8ebf2;
+      left: 82px;
+      top: 50px;
+    }
+  }
+  input {
+    border: 1px solid $light-semi-gray;
+    padding: 10px 10px 10px 70px;
+    border-radius: 50px;
+    background-color: rgba($light-color, 0.3);
+    &:focus {
+      outline: none !important;
+    }
+  }
+}
+.form-label-align-right {
+  label {
+    text-align: right;
+    padding-top: 17px;
+    font-weight: 500;
+  }
+}
+/* base-input css start */
+form {
+  &.basic-html-input-control-form {
+    input {
+      &[type="date"]::-webkit-calendar-picker-indicator {
+        color: transparent;
+        background: none;
+        z-index: 1;
+      }
+      &[type="date"] {
+        &::after {
+          color: transparent;
+          background: none;
+          display: block;
+          font-family: "FontAwesome";
+          content: "\f073";
+          width: 15px;
+          height: 20px;
+          position: absolute;
+          right: 2%;
+          color: $form-placeholder-color;
+        }
+      }
+    }
+    input {
+      &[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        color: transparent;
+        background: none;
+        z-index: 1;
+      }
+      &[type="datetime-local"] {
+        &::after {
+          color: transparent;
+          background: none;
+          display: block;
+          font-family: "FontAwesome";
+          content: "\f073";
+          width: 15px;
+          height: 20px;
+          position: absolute;
+          right: 2%;
+          color: $light-text;
+        }
+      }
+    }
+    input {
+      &[type="month"]::-webkit-calendar-picker-indicator {
+        color: transparent;
+        background: none;
+        z-index: 1;
+      }
+      &[type="month"] {
+        &::after {
+          color: transparent;
+          background: none;
+          display: block;
+          font-family: "FontAwesome";
+          content: "\f073";
+          width: 15px;
+          height: 20px;
+          position: absolute;
+          right: 2%;
+          color: $form-placeholder-color;
+        }
+      }
+    }
+    input {
+      &[type="week"]::-webkit-calendar-picker-indicator {
+        color: transparent;
+        background: none;
+        z-index: 1;
+      }
+      &[type="week"] {
+        &::after {
+          color: transparent;
+          background: none;
+          display: block;
+          font-family: "FontAwesome";
+          content: "\f073";
+          width: 15px;
+          height: 20px;
+          position: absolute;
+          right: 2%;
+          color: $form-placeholder-color;
+        }
+      }
+    }
+    input {
+      &[type="time"]::-webkit-calendar-picker-indicator {
+        color: transparent;
+        background: none;
+        z-index: 1;
+      }
+      &[type="time"] {
+        &::after {
+          color: transparent;
+          background: none;
+          display: block;
+          font-family: "FontAwesome";
+          content: "\f017";
+          width: 15px;
+          height: 20px;
+          position: absolute;
+          right: 2%;
+          color: $form-placeholder-color;
+        }
+      }
+    }
+  }
+}
+/* base-input css End */
+/**=====================  
+    13. Form CSS Ends
+==========================**/

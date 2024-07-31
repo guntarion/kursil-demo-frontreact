@@ -1,0 +1,42 @@
+/**=====================
+    27. Touchspin  CSS Start
+==========================**/
+.bootstrap-touchspin {
+  input {
+    &.touchspin {
+      padding: 6px 12px;
+    }
+  }
+  .input-group .btn {
+    padding: 0.5rem 1.75rem;
+  }
+  .input-group {
+    font-family: $font-rubik, $font-serif;
+    .btn {
+      border-radius: 0 !important;
+    }
+  }
+  .dropdown-basic {
+    .dropdown {
+      .dropbtn {
+        padding: 9px 30px;
+      }
+      .dropdown-content {
+        z-index: 9999;
+        left: -55px;
+      }
+    }
+  }
+}
+.clipboaard-container{
+  h6{
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+.horizontal-layout, .form-bottom{
+  align-items: center;
+}
+/**=====================
+     27. Touchspin  CSS Ends
+==========================**/

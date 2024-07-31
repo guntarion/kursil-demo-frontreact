@@ -1,0 +1,352 @@
+/**=====================
+    04. Alert CSS start
+==========================**/
+.notify-alert {
+  .btn-close {
+    background: unset;
+    border: none;
+    font-size: 25px;
+  }
+}
+.alert {
+  border-radius: $alert-border-radious;
+  padding: 15px;
+  svg {
+    vertical-align: middle;
+  }
+  .progress {
+    margin-top: $alert-padding;
+  }
+  [data-notify="icon"] {
+    margin-right: 10px;
+    line-height: 20px;
+    display: inline-block;
+  }
+  [data-notify="title"] {
+    display: inline-block;
+  }
+  [data-notify="message"] {
+    display: inline-block;
+    width: 100%;
+  }
+  i {
+    margin-right: 5px;
+    font-size: $alert-msg-icon-size;
+  }
+  p {
+    margin-bottom: 0;
+  }
+  .btn-close {
+    opacity: 1;
+    span {
+      font-size: 24px;
+      font-weight: 400;
+      display: inline-block;
+      border-radius: 3px;
+      text-shadow: none;
+      padding: 0 5px;
+      padding-right: 0;
+    }
+  }
+}
+.alert-dismissible {
+  .btn-close {
+    padding: 10px 1.25rem;
+    top: 8px;
+    padding-right: 13px;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    &:hover {
+      transition: all 0.3s ease;
+      opacity: 1;
+      color: inherit;
+    }
+  }
+}
+.card-body {
+  button {
+    &:focus {
+      outline: none;
+    }
+  }
+  .alert {
+    &:last-child {
+      margin-bottom: 0;
+    }
+    svg {
+      width: 14px;
+      height: 14px;
+      margin-right: 4px;
+      position: absolute;
+      top: 18px;
+      & ~ p {
+        padding-left: 20px;
+      }
+    }
+  }
+}
+strong {
+  display: inline-block;
+  & ~ p {
+    display: inline-block;
+  }
+}
+$alert-name: primary, secondary, success, danger, warning, info, light, dark;
+$alert-color: $primary-color, $secondary-color, $success-color, $danger-color,
+  $warning-color, $info-color, $light-color, $dark-color;
+@each $var in $alert-name {
+  $i: index($alert-name, $var);
+  .alert-#{$var} {
+    background-color: rgba(nth($alert-color, $i), 0.8);
+    border-color: rgba(nth($alert-color, $i), 0.9);
+    color: $white;
+    .progress {
+      height: 5px;
+      background-color: darken(nth($alert-color, $i), 1%);
+      border-radius: 0;
+    }
+    .progress-bar {
+      background-color: lighten(nth($alert-color, $i), 50%);
+    }
+    .btn-close {
+      filter: brightness(1) invert(1);
+    }
+    .alert-link {
+      color: nth($alert-color, $i);
+      @if ($var== "light") {
+        color: $dark-color;
+      }
+    }
+    @if ($var== "light") {
+      color: $dark-color;
+      background-color: $light-color;
+      .btn-close {
+        filter: unset;
+      }
+    }
+    hr {
+      border-top-color: nth($alert-color, $i);
+    }
+  }
+  .alert-#{$var}.dark {
+    .alert-link {
+      color: $white;
+      @if ($var== "light") {
+        color: $dark-color;
+      }
+    }
+    background-color: nth($alert-color, $i);
+    border-color: nth($alert-color, $i);
+    color: $auth-bg-color;
+    @if ($var== "light") {
+      color: $dark-color;
+    }
+  }
+  .alert-#{$var}.outline,
+  .alert-#{$var}.outline-2x {
+    background-color: $transparent-color;
+    border-color: nth($alert-color, $i);
+    color: nth($alert-color, $i);
+    .btn-close {
+      filter: unset;
+    }
+    @if ($var== "light") {
+      color: $dark-color;
+    }
+  }
+  .alert-#{$var}.inverse {
+    &:before {
+      top: 16px;
+      content: "";
+      position: absolute;
+      left: 54px;
+      width: 0;
+      height: 0;
+      border-left: 7px solid nth($alert-color, $i);
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+    }
+    background-color: transparent;
+    padding: 13px 20px 13px 65px;
+    border-color: nth($alert-color, $i);
+    color: $theme-body-font-color;
+    i {
+      padding: 17px 20px;
+      display: inline-block;
+      background-color: nth($alert-color, $i);
+      color: $white;
+      border-radius: 3px 0 0 3px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+    }
+    .btn-close {
+      filter: unset;
+    }
+  }
+}
+.dismiss-text {
+  button{
+    > div {
+      border-radius: 3px;
+    }
+  }
+  .alert-dismissible {
+    .btn-close {
+      top: 13px !important;
+      right: 38px;
+      span{
+        top: 0 !important;
+        font-size: 13px;
+        padding: 3px 5px;
+      }
+    }
+  }
+}
+.dismiss-text {
+  .alert {
+    .btn-close {
+      background: unset;
+      opacity: 1;
+      top: 15px;
+      right: 15px;
+      width: fit-content;
+      height: fit-content;
+      padding: 0;
+      span {
+        display: inline-block;
+        border-radius: 3px;
+        text-shadow: none;
+        padding: 0 5px;
+      }
+    }
+  }
+}
+.outline-2x {
+  border-width: 2px;
+  padding: 11px 1.25rem;
+}
+/*bootsrap notify css start  */
+.alert-notify-section {
+  .notify-alert {
+    display: flex;
+    align-items: center;
+  }
+}
+@media only screen and (max-width: 576px) {
+  .alert-dismissible {
+    .btn-close {
+      font-size: 10px;
+    }
+  }
+}
+/*bootsrap notify css end*/
+// Style for Error1 Pages
+.error1shp0 {
+  fill: #ebebeb;
+}
+.error1shp1 {
+  fill: #e0e0e0;
+}
+.error1shp2 {
+  fill: #6362e7;
+}
+.error1shp3 {
+  fill: #ffffff;
+}
+.error1shp4 {
+  opacity: "0.8";
+  fill: "#ffffff";
+}
+.error1shp5 {
+  fill: #000000;
+}
+.error1shp6 {
+  fill: #ff8819;
+}
+.error1shp7 {
+  fill: #263238;
+}
+.error1shp8 {
+  fill: #ffbe9d;
+}
+.error1shp9 {
+  fill: #eb996e;
+}
+// Style for Error2 Pages
+.error2shp0 {
+  fill: #e0e0e0;
+}
+.error2shp1 {
+  fill: #455a64;
+}
+.error2shp2 {
+  fill: #6362e7;
+}
+.error2shp3 {
+  opacity: 0.4;
+  mix-blend-mode: soft-light;
+  fill: #ffffff;
+}
+.error2shp4 {
+  opacity: 0.051;
+  mix-blend-mode: multiply;
+  fill: #000000;
+}
+.error2shp5 {
+  opacity: 0.4;
+  fill: #ffffff;
+}
+.error2shp6 {
+  opacity: 0.2;
+  fill: #000000;
+}
+.error2shp7 {
+  opacity: 0.102;
+  fill: #000000;
+}
+.error2shp8 {
+  fill: #ffffff;
+}
+.error2shp9 {
+  opacity: 0.2;
+  fill: #ffffff;
+}
+.error2shp10 {
+  fill: #000000;
+}
+.error2shp11 {
+  opacity: 0.149;
+  fill: #000000;
+}
+.error2shp12 {
+  fill: #37474f;
+}
+.error2shp13 {
+  fill: #263238;
+}
+.error2shp14 {
+  opacity: 0.302;
+  fill: #000000;
+}
+.error2shp15 {
+  opacity: 0.502;
+  fill: #000000;
+}
+.error2shp16 {
+  opacity: 0.702;
+  fill: #000000;
+}
+.error2shp17 {
+  fill: #fafafa;
+}
+.error2shp18 {
+  fill: #ffa8a7;
+}
+.error2shp19 {
+  fill: #f28f8f;
+}
+/**=====================
+     04. Alert CSS end
+==========================**/

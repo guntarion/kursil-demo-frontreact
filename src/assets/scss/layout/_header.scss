@@ -1,0 +1,131 @@
+/**=====================
+    32. Header CSS Start
+==========================**/
+/**======Main Header css Start ======**/
+.toggle-sidebar {
+  .status_toggle {
+    path {
+      stroke: var(--theme-default) !important;
+      fill: rgba($primary-color, 0.25);
+    }
+  }
+  cursor: pointer;
+  &:hover {
+    &:before {
+      height: 40px;
+      width: 40px;
+      transform: scale(1);
+      transition: all 0.3s ease;
+    }
+    >svg {
+      color: var(--theme-default) !important;
+      stroke: var(--theme-default) !important;
+    }
+  }
+}
+.onhover-dropdown {
+  cursor: pointer;
+  position: relative;
+  &:hover {
+    .onhover-show-div {
+      @extend %for-animated-hover-box;
+    }
+  }
+}
+.onhover-show-div {
+  top: 80px;
+  position: absolute;
+  z-index: 8;
+  background-color: $white;
+  transition: all linear 0.3s;
+  @extend %for-animated-hover;
+  li {
+    a {
+      svg {
+        margin-top: 0 !important;
+        path,
+        line {
+          color: $theme-body-font-color  !important;
+        }
+      }
+    }
+  }
+}
+/**======Main Header css Ends ======**/
+/*=======Mega menu css start=======*/
+.mega-menu {
+  .default-according {
+    .card {
+      .btn-link {
+        font-weight: 500;
+        color: gray;
+      }
+      .card-body {
+        font-size: 12px;
+      }
+    }
+  }
+  .onhover-show-div {
+    width: 1500px;
+  }
+  .card-body {
+    padding: 20px;
+  }
+  div {
+    >div {
+      a {
+        margin-bottom: 0px;
+        display: inline-block;
+        color: $theme-body-sub-title-color;
+      }
+    }
+  }
+}
+/*=======Mega menu css end=======*/
+/*=======left side menu css start=======*/
+.left-side-header {
+  display: flex;
+  a {
+    color: $dark;
+    display: flex;
+    align-items: center;
+    svg {
+      vertical-align: middle;
+    }
+  }
+  .input-group {
+    margin-left: 25px;
+    span {
+      background: transparent;
+      border-right: none;
+      border-top-left-radius: 25px;
+      border-bottom-left-radius: 25px;
+      border-color: #D8E0FF !important;
+      padding-left: 20px;
+      svg {
+        height: 18px;
+        width: 18px;
+        stroke: $dark;
+      }
+    }
+    input {
+      border: 1px solid #D8E0FF;
+      box-sizing: border-box;
+      border-radius: 0 25px 25px 0 !important;
+      max-width: 100%;
+      margin-left: 18px;
+      border-left: none;
+      padding: 10px 20px 10px 0;
+      background-color: transparent;
+      font-size: 16px;
+      &:focus {
+        outline-color: #D8E0FF;
+        box-shadow: none;
+      }
+    }
+  }
+}
+/*=======left side menu css end=======*/
+/**=====================
+    32. Header CSS Ends
+==========================**/

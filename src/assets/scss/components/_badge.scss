@@ -1,0 +1,99 @@
+/**=====================
+    06. Badge CSS start
+==========================**/
+.badge {
+  padding: $badge-padding;
+  font-family: $font-roboto, $font-serif;
+  font-weight: 500;
+  & + .badge {
+    margin-left: 5px;
+  }
+  svg {
+    width: $badge-svg-size;
+    height: $badge-svg-size;
+    padding-top: 3px;
+  }
+}
+// flat badge loop css
+@each $pill-badge-name, $pill-badge-color in (primary, var(--theme-default)),
+  (secondary, var(--theme-secondary)), (success, $success-color),
+  (danger, $danger-color), (info, $info-color), (light, $light-color),
+  (dark, $dark-color), (warning, $warning-color)
+{
+  .pill-badge-#{$pill-badge-name} {
+    background-color: $pill-badge-color;
+    box-shadow: -0.5px 4.33px 16px 0px rgba($pill-badge-color, 0.25);
+    color: $white;
+    border-radius: 0;
+  }
+}
+.pill-badge-primary {
+  background-color: var(--theme-default);
+}
+.pill-badge-secondary {
+  background-color: var(--theme-secondary);
+}
+// round badge loop css
+@each $round-badge-name, $round-badge-color in (primary, var(--theme-default)),
+  (secondary, var(--theme-secondary)), (success, $success-color),
+  (danger, $danger-color), (info, $info-color), (light, $light-color),
+  (dark, $dark-color), (warning, $warning-color)
+{
+  .round-badge-#{$round-badge-name} {
+    border-radius: 6px;
+    background-color: $round-badge-color;
+    box-shadow: -0.5px -6.67px 14px 0px rgba($round-badge-color, 0.18);
+    color: $white !important;
+  }
+}
+.round-badge-primary {
+  background-color: var(--theme-default);
+}
+.round-badge-secondary {
+  background-color: var(--theme-secondary);
+}
+.badges-example-sec {
+  .card-body {
+    h6 {
+      margin-bottom: 0;
+    }
+  }
+}
+/* pagination */
+$page-name: theme, primary, secondary, success, danger, info, dark, warning;
+$page-color: var(--theme-default), var(--theme-default), var(--theme-secondary),
+  $success-color, $danger-color, $info-color, $dark-color, $warning-color;
+@each $var in $page-name {
+  $i: index($page-name, $var);
+  .pagination-#{$var} {
+    .page-item {
+      .page-link {
+        color: nth($page-color, $i) !important;
+      }
+      &.active {
+        .page-link {
+          color: $white !important;
+          background-color: nth($page-color, $i) !important;
+          border-color: nth($page-color, $i);
+        }
+      }
+    }
+  }
+}
+@each $badge-light-name, $badge-light-color in (primary, $primary-color),
+  (secondary, $secondary-color), (success, $success-color),
+  (danger, $danger-color), (info, $info-color), (light, $light-color),
+  (dark, $dark-color), (warning, $warning-color), (theme-light, $light-1)
+{
+  .badge-light-#{$badge-light-name} {
+    background-color: rgba($badge-light-color, 0.1);
+    color: $badge-light-color;
+  }
+}
+.badge-light-theme-light {
+  background-color: $light-2;
+  color: $light-1;
+}
+/**=====================
+    06. Badge CSS Ends
+==========================**/

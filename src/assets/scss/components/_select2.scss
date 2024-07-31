@@ -1,0 +1,49 @@
+/**=====================
+    23. Select 2 CSS Start
+==========================**/
+.select2-drpdwn {
+  .card-body {
+    label {
+      font-weight: 500;
+    }
+  }
+  .form-control {
+    border-radius: 5px;
+  }
+  @each $form-control-name, $form-control-color in (primary, var(--theme-default)),
+  (secondary, var(--theme-secondary)), (success, $success-color),
+  (danger, $danger-color), (info, $info-color),
+  (inverse, $dark-color), (warning, $warning-color)
+  {
+    .form-control-#{$form-control-name} {
+      border-color: $form-control-color;
+      color: $form-control-color;
+    }
+  }
+  @each $form-control-name-fill, $form-control-color-fill in (primary, var(--theme-default)),
+  (secondary, var(--theme-secondary)), (success, $success-color),
+  (danger, $danger-color), (info, $info-color),
+  (inverse, $dark-color), (warning, $warning-color)
+  {
+    .form-control-#{$form-control-name-fill}-fill {
+      background-color: $form-control-color-fill;
+      color: $white;
+    }
+  }
+}
+.select2-drpdwn{
+  .css-1rhbuit-multiValue{
+    background-color: $primary-color;
+    > div{
+      color: $white;
+    }
+    div[role="button"]{
+      &:hover{
+        background-color: unset;
+      }
+    }
+  }
+}
+/**=====================
+    23. Select 2 CSS Ends
+==========================**/
