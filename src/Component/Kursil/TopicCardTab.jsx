@@ -15,8 +15,28 @@ const StyledUl = styled.ul`
   }
 `;
 
+const Loader = styled.div`
+  width: 120px;
+  height: 20px;
+  -webkit-mask: linear-gradient(90deg, #000 70%, #0000 0) 0/20%;
+  background:
+    linear-gradient(#000 0 0) 0/0% no-repeat
+    #ddd;
+  animation: l4 2s infinite steps(6);
+
+  @keyframes l4 {
+    100% { background-size: 120% }
+  }
+`;
+
+
 const TopicCardTab = ({ topic }) => {
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [miscLoading, setMiscLoading] = useState(false);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [timerId, setTimerId] = useState(null);
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
   const [elaborated, setElaborated] = useState(false);
@@ -28,6 +48,7 @@ const TopicCardTab = ({ topic }) => {
   const [openAccordion, setOpenAccordion] = useState(null);
 
   useEffect(() => {
+
     const fetchPointsDiscussion = async () => {
       try {
         const response = await axios.get(`http://localhost:8000/api/points-discussion/${topic._id}`);
@@ -130,8 +151,25 @@ const fetchPointsDiscussion = async () => {
   }
 };
 
+const startStopwatch = () => {
+  const id = setInterval(() => {
+    setElapsedTime((prevTime) => prevTime + 1);
+  }, 1000);
+  setTimerId(id);
+};
+
+const stopStopwatch = () => {
+  if (timerId) {
+    clearInterval(timerId);
+    setTimerId(null);
+  }
+  setElapsedTime(0);
+};
+
 const handleHandout = async () => {
+  setIsLoading(true);
   setContentLoading(true);
+  startStopwatch();
   try {
     const response = await axios.post('http://localhost:8000/api/generate-topic-handout', {
       topic_id: topic._id
@@ -144,7 +182,52 @@ const handleHandout = async () => {
     showAlert('Error generating handout', 'danger');
   }
   setContentLoading(false);
+  setIsLoading(false);
+  stopStopwatch();
 };
+
+const handleMiscPoints = async () => {
+  setIsLoading(true);
+  setMiscLoading(true);
+  startStopwatch();
+
+  try {
+    const response = await axios.post('http://localhost:8000/api/generate-topic-misc', {
+      topic_id: topic._id
+    });
+    showAlert(response.data.message, 'success');
+    await fetchPointsDiscussion();
+  } catch (error) {
+    console.error('Error generating misc points:', error);
+    showAlert('Error generating misc points', 'danger');
+  }
+
+  setMiscLoading(false);
+  setIsLoading(false);
+  stopStopwatch();
+};
+
+const handleQuizGeneration = async () => {
+  setIsLoading(true);
+  setQuizLoading(true);
+  startStopwatch();
+
+  try {
+    const response = await axios.post('http://localhost:8000/api/generate-topic-quiz', {
+      topic_id: topic._id
+    });
+    showAlert(response.data.message, 'success');
+    await fetchPointsDiscussion();
+  } catch (error) {
+    console.error('Error generating quiz:', error);
+    showAlert('Error generating quiz', 'danger');
+  }
+
+  setQuizLoading(false);
+  setIsLoading(false);
+  stopStopwatch();
+};
+
 
   const showAlert = (message, color) => {
     setAlert({ visible: true, message, color });
@@ -425,9 +508,13 @@ const handleHandout = async () => {
                 <Button color="info" className="mb-2 w-100" onClick={handleHandout} disabled={contentLoading}>
                   {contentLoading ? 'Generating...' : 'Handout'}
                 </Button>
-                <Button color="warning" className="mb-2 w-100">Evaluation</Button>
-                <Button color="success" className="mb-2 w-100">Outline</Button>
-                <Button color="primary" className="mb-2 w-100">Quiz</Button>
+                <Button color="warning" className="mb-2 w-100" onClick={handleMiscPoints} disabled={miscLoading}>
+                  {miscLoading ? 'Generating...' : 'Objective - Method - Duration'}
+                </Button>
+                <Button color="primary" className="mb-2 w-100" onClick={handleQuizGeneration} disabled={quizLoading}>
+                  {quizLoading ? 'Generating...' : 'Quiz'}
+                </Button>
+                <Button color="success" className="mb-2 w-100">Presentation</Button>
               </TabPane>
             </TabContent>
           </Col>
@@ -439,6 +526,12 @@ const handleHandout = async () => {
         )}
       </CardBody>
       <CardFooter>
+        {isLoading && (
+          <div className="d-flex flex-column align-items-center">
+            <Loader className="mb-2" />
+            <P>Time elapsed: {elapsedTime} seconds</P>
+          </div>
+        )}
         {promptingLoading && (
           <div>
             <Progress value={progress} className="mb-3">
