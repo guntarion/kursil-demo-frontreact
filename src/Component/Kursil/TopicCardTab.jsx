@@ -1,8 +1,10 @@
+// src/Component/Kursil/TopicCardTab.jsx
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardBody, Row, Col, Button, Alert, Nav, NavItem, NavLink, TabContent, TabPane, Accordion, AccordionItem, AccordionHeader, AccordionBody } from 'reactstrap';
 import { H5, P } from '../../AbstractElements';
 import styled from 'styled-components';
 import axios from 'axios';
+import Markdown from 'markdown-to-jsx';
 
 const StyledUl = styled.ul`
   list-style-type: disc;
@@ -126,11 +128,51 @@ const TopicCardTab = ({ topic }) => {
               </NavItem>
               <NavItem>
                 <NavLink className={activeTab === '4' ? 'active' : ''} onClick={() => toggle('4')}>
-                  Output
+                  Handout
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink className={activeTab === '5' ? 'active' : ''} onClick={() => toggle('5')}>
+                  learn_objective
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink className={activeTab === '6' ? 'active' : ''} onClick={() => toggle('6')}>
+                  assessment
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink className={activeTab === '7' ? 'active' : ''} onClick={() => toggle('7')}>
+                  method
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink className={activeTab === '8' ? 'active' : ''} onClick={() => toggle('8')}>
+                  quiz
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink className={activeTab === '9' ? 'active' : ''} onClick={() => toggle('9')}>
+                  casestudy
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink className={activeTab === '10' ? 'active' : ''} onClick={() => toggle('10')}>
+                  discussion
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink className={activeTab === '11' ? 'active' : ''} onClick={() => toggle('11')}>
+                  outline
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink className={activeTab === '12' ? 'active' : ''} onClick={() => toggle('12')}>
+                  and script
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink className={activeTab === '13' ? 'active' : ''} onClick={() => toggle('13')}>
                   Actions
                 </NavLink>
               </NavItem>
@@ -157,7 +199,7 @@ const TopicCardTab = ({ topic }) => {
                     <AccordionItem key={index}>
                       <AccordionHeader targetId={index.toString()}>{point.point_of_discussion}</AccordionHeader>
                       <AccordionBody accordionId={index.toString()}>
-                        {point.elaboration || "No elaboration available."}
+                        <Markdown>{point.elaboration || "No elaboration available."}</Markdown>
                       </AccordionBody>
                     </AccordionItem>
                   ))}
@@ -170,7 +212,9 @@ const TopicCardTab = ({ topic }) => {
                     <AccordionItem key={index}>
                       <AccordionHeader targetId={`p${index}`}>{point.point_of_discussion}</AccordionHeader>
                       <AccordionBody accordionId={`p${index}`}>
-                        {point.prompting || "No prompting available."}
+                        <Markdown>
+                            {point.prompting || "No prompting available."}
+                          </Markdown>
                       </AccordionBody>
                     </AccordionItem>
                   ))}
@@ -183,13 +227,137 @@ const TopicCardTab = ({ topic }) => {
                     <AccordionItem key={index}>
                       <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
                       <AccordionBody accordionId={`h${index}`}>
-                        {point.handout || "No handout content available."}
+                        <Markdown>
+                          {point.handout || "No handout content available."}
+                        </Markdown>
                       </AccordionBody>
                     </AccordionItem>
                   ))}
                 </Accordion>
               </TabPane>
+
               <TabPane tabId="5">
+                <H5>Output Content</H5>
+                <Accordion open={openAccordion} toggle={toggleAccordion}>
+                  {pointsDiscussion.map((point, index) => (
+                    <AccordionItem key={index}>
+                      <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
+                      <AccordionBody accordionId={`h${index}`}>
+                        <Markdown>
+                          {point.learn_objective || "No learn_objective content available."}
+                        </Markdown>
+                      </AccordionBody>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </TabPane>
+              <TabPane tabId="6">
+                <H5>Output Content</H5>
+                <Accordion open={openAccordion} toggle={toggleAccordion}>
+                  {pointsDiscussion.map((point, index) => (
+                    <AccordionItem key={index}>
+                      <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
+                      <AccordionBody accordionId={`h${index}`}>
+                        <Markdown>
+                          {point.assessment || "No assessment content available."}
+                        </Markdown>
+                      </AccordionBody>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </TabPane>
+              <TabPane tabId="7">
+                <H5>Output Content</H5>
+                <Accordion open={openAccordion} toggle={toggleAccordion}>
+                  {pointsDiscussion.map((point, index) => (
+                    <AccordionItem key={index}>
+                      <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
+                      <AccordionBody accordionId={`h${index}`}>
+                        <Markdown>
+                          {point.method || "No method content available."}
+                        </Markdown>
+                      </AccordionBody>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </TabPane>
+              <TabPane tabId="8">
+                      <H5>Output Content</H5>
+                      <Accordion open={openAccordion} toggle={toggleAccordion}>
+                        {pointsDiscussion.map((point, index) => (
+                          <AccordionItem key={index}>
+                            <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
+                            <AccordionBody accordionId={`h${index}`}>
+                              <Markdown>
+                                {point.quiz || "No quiz content available."}
+                              </Markdown>
+                            </AccordionBody>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
+                    </TabPane>
+              <TabPane tabId="9">
+                    <H5>Output Content</H5>
+                    <Accordion open={openAccordion} toggle={toggleAccordion}>
+                      {pointsDiscussion.map((point, index) => (
+                        <AccordionItem key={index}>
+                          <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
+                          <AccordionBody accordionId={`h${index}`}>
+                            <Markdown>
+                              {point.casestudy || "No casestudy content available."}
+                            </Markdown>
+                          </AccordionBody>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </TabPane>
+              <TabPane tabId="10">
+                    <H5>Output Content</H5>
+                    <Accordion open={openAccordion} toggle={toggleAccordion}>
+                      {pointsDiscussion.map((point, index) => (
+                        <AccordionItem key={index}>
+                          <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
+                          <AccordionBody accordionId={`h${index}`}>
+                            <Markdown>
+                              {point.discussion || "No discussion content available."}
+                            </Markdown>
+                          </AccordionBody>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </TabPane>
+              <TabPane tabId="11">
+                    <H5>Output Content</H5>
+                    <Accordion open={openAccordion} toggle={toggleAccordion}>
+                      {pointsDiscussion.map((point, index) => (
+                        <AccordionItem key={index}>
+                          <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
+                          <AccordionBody accordionId={`h${index}`}>
+                            <Markdown>
+                              {point.outline || "No outline content available."}
+                            </Markdown>
+                          </AccordionBody>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </TabPane>
+              <TabPane tabId="12">
+                    <H5>Output Content</H5>
+                    <Accordion open={openAccordion} toggle={toggleAccordion}>
+                      {pointsDiscussion.map((point, index) => (
+                        <AccordionItem key={index}>
+                          <AccordionHeader targetId={`h${index}`}>{point.point_of_discussion}</AccordionHeader>
+                          <AccordionBody accordionId={`h${index}`}>
+                            <Markdown>
+                              {point.and || "No and content available."}
+                            </Markdown>
+                          </AccordionBody>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </TabPane>                  
+
+              <TabPane tabId="13">
                 <Button color="primary" className="mb-2 w-100" onClick={handleElaborate} disabled={loading || elaborated}>
                   {loading ? 'Elaborating...' : elaborated ? 'Elaborated' : 'Elaborate'}
                 </Button>
