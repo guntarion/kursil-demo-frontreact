@@ -1,6 +1,6 @@
-// src/Component/Kursil/TopicCardTab.jsx
+// react frontend src/Component/Kursil/TopicCardTab.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardHeader, CardBody, CardFooter, Row, Col, Button, Alert, Nav, NavItem, NavLink, TabContent, TabPane, Accordion, AccordionItem, AccordionHeader, AccordionBody, Progress } from 'reactstrap';
+import { Card, CardHeader, CardBody, CardFooter, Row, Col, Button, Alert, Nav, NavItem, NavLink, TabContent, TabPane, Accordion, AccordionItem, AccordionHeader, AccordionBody } from 'reactstrap';
 import { H5, P } from '../../AbstractElements';
 import styled from 'styled-components';
 import axios from 'axios';
@@ -34,8 +34,8 @@ const TopicCardTab = ({ topic }) => {
   const [currentActivity, setCurrentActivity] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
   const [timerId, setTimerId] = useState(null);
-  const [progress, setProgress] = useState(0);
-  const [progressMessage, setProgressMessage] = useState('');
+  // const [progress, setProgress] = useState(0);
+  // const [progressMessage, setProgressMessage] = useState('');
   const [elaborateLoading, setElaborateLoading] = useState(false);
   const [promptingLoading, setPromptingLoading] = useState(false);
   const [contentLoading, setContentLoading] = useState(false);
@@ -59,8 +59,8 @@ const TopicCardTab = ({ topic }) => {
         showAlert('Points of discussion updated successfully', 'success');
       }
     } catch (error) {
-      console.error('Error fetching points of discussion:', error);
-      showAlert(`Error fetching ${showUpdateAlert ? 'updated ' : ''}points of discussion`, 'danger');
+      console.error('Data points of discussion is not available:', error);
+      showAlert(`Data points of discussion is not available ${showUpdateAlert ? 'updated ' : ''}`, 'danger');
     }
   }, [topic._id, showAlert]);
 
@@ -84,28 +84,6 @@ const TopicCardTab = ({ topic }) => {
     setCurrentActivity('');
   };
 
-  const handleOperation = async (operation, loadingSetter, activityName, apiEndpoint) => {
-    setIsLoading(true);
-    loadingSetter(true);
-    setCurrentActivity(activityName);
-    startStopwatch();
-
-    try {
-      const response = await axios.post(`http://localhost:8000/api/${apiEndpoint}`, {
-        topic_id: topic._id
-      });
-      showAlert(response.data.message, 'success');
-      await fetchPointsDiscussion(true);
-    } catch (error) {
-      console.error(`Error ${operation}:`, error);
-      showAlert(`Error ${operation}`, 'danger');
-    }
-
-    loadingSetter(false);
-    setIsLoading(false);
-    stopStopwatch();
-  };
-
   const handleElaborate = async () => {
     setIsLoading(true);
     setElaborateLoading(true);
@@ -118,6 +96,8 @@ const TopicCardTab = ({ topic }) => {
         points_of_discussion: topic.point_of_discussion
       });
       setPointsDiscussion(response.data.elaborated_points);
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
       await fetchPointsDiscussion(true);
       showAlert('Points elaborated successfully!', 'success');
     } catch (error) {
@@ -132,58 +112,19 @@ const TopicCardTab = ({ topic }) => {
   const handlePrompting = async () => {
     setIsLoading(true);
     setPromptingLoading(true);
-    setProgress(0);
-    setProgressMessage('');
     setCurrentActivity('Generating Prompting');
     startStopwatch();
 
     try {
-      const response = await fetch(`http://localhost:8000/api/generate-topic-prompting`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ topic_id: topic._id }),
+      const response = await axios.post('http://localhost:8000/api/generate-topic-prompting', {
+        topic_id: topic._id
       });
-
-      if (!response.ok) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (response.status === 200) {
+        await fetchPointsDiscussion(true);
+        showAlert('Prompting generation completed', 'success');
+      } else {
         throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        console.log('Received chunk:', chunk);
-
-        const lines = chunk.split('\n\n');
-
-        for (const line of lines) {
-          if (line.trim() !== '') {
-            try {
-              const [eventField, dataField] = line.split('\n');
-              const eventType = eventField.replace('event: ', '').trim();
-              const data = JSON.parse(dataField.replace('data: ', '').trim());
-
-              console.log('Parsed event:', eventType, 'data:', data);
-
-              if (eventType === 'progress') {
-                setProgress(data.progress);
-                setProgressMessage(data.message);
-              } else if (eventType === 'complete') {
-                await fetchPointsDiscussion(true);
-                showAlert('Prompting generation completed', 'success');
-                break;
-              }
-            } catch (parseError) {
-              console.error('Error parsing SSE data:', parseError, 'Line:', line);
-            }
-          }
-        }
       }
     } catch (error) {
       showAlert(`Error generating prompting summaries: ${error.message}`, 'danger');
@@ -195,9 +136,88 @@ const TopicCardTab = ({ topic }) => {
     stopStopwatch();
   };
 
-  const handleHandout = () => handleOperation('generating handout', setContentLoading, 'Generating Handout', 'generate-topic-handout');
-  const handleMiscPoints = () => handleOperation('generating misc points', setMiscLoading, 'Generating Objective - Method - Duration', 'generate-topic-misc');
-  const handleQuizGeneration = () => handleOperation('generating quiz', setQuizLoading, 'Generating Quiz', 'generate-topic-quiz');
+
+const handleHandout = async () => {
+  setIsLoading(true);
+  setContentLoading(true);
+  setCurrentActivity('Generating Handout');
+  startStopwatch();
+
+  try {
+    const response = await axios.post('http://localhost:8000/api/generate-topic-handout', {
+      topic_id: topic._id
+    });
+
+    if (response.status === 200) {
+      await fetchPointsDiscussion(true);
+      showAlert('Handout generation completed successfully', 'success');
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error generating handout:', error);
+    showAlert(`Error generating handout: ${error.message}`, 'danger');
+  }
+
+  setContentLoading(false);
+  setIsLoading(false);
+  stopStopwatch();
+};
+
+const handleMiscPoints = async () => {
+  setIsLoading(true);
+  setMiscLoading(true);
+  setCurrentActivity('Generating Objective - Method - Duration');
+  startStopwatch();
+
+  try {
+    const response = await axios.post('http://localhost:8000/api/generate-topic-misc', {
+      topic_id: topic._id
+    });
+
+    if (response.status === 200) {
+      await fetchPointsDiscussion(true);
+      showAlert('Misc points generation completed successfully', 'success');
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error generating misc points:', error);
+    showAlert(`Error generating misc points: ${error.message}`, 'danger');
+  }
+
+  setMiscLoading(false);
+  setIsLoading(false);
+  stopStopwatch();
+};
+
+const handleQuizGeneration = async () => {
+  setIsLoading(true);
+  setQuizLoading(true);
+  setCurrentActivity('Generating Quiz');
+  startStopwatch();
+
+  try {
+    const response = await axios.post('http://localhost:8000/api/generate-topic-quiz', {
+      topic_id: topic._id
+    });
+
+    if (response.status === 200) {
+      await fetchPointsDiscussion(true);
+      showAlert('Quiz generation completed successfully', 'success');
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error generating quiz:', error);
+    showAlert(`Error generating quiz: ${error.message}`, 'danger');
+  }
+
+  setQuizLoading(false);
+  setIsLoading(false);
+  stopStopwatch();
+};
+  
 
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -301,14 +321,6 @@ const TopicCardTab = ({ topic }) => {
           <div className="d-flex flex-column align-items-center">
             <Loader className="mb-2" />
             <P>{currentActivity} | Time elapsed: {elapsedTime} seconds</P>
-          </div>
-        )}
-        {promptingLoading && (
-          <div>
-            <Progress value={progress} className="mb-3">
-              {Math.round(progress)}%
-            </Progress>
-            <P className="text-center">{progressMessage}</P>
           </div>
         )}
       </CardFooter>
