@@ -33,14 +33,16 @@ const TopicCardTab = ({ topic }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentActivity, setCurrentActivity] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [timerId, setTimerId] = useState(null);
-  // const [progress, setProgress] = useState(0);
-  // const [progressMessage, setProgressMessage] = useState('');
+  const [totalElapsedTime, setTotalElapsedTime] = useState(0);
+  const [stopwatchInterval, setStopwatchInterval] = useState(null);
+  const [totalStopwatchInterval, setTotalStopwatchInterval] = useState(null);
+
   const [elaborateLoading, setElaborateLoading] = useState(false);
   const [promptingLoading, setPromptingLoading] = useState(false);
   const [contentLoading, setContentLoading] = useState(false);
   const [miscLoading, setMiscLoading] = useState(false);
   const [quizLoading, setQuizLoading] = useState(false);
+  const [executingAll, setExecutingAll] = useState(false);
   const [activeTab, setActiveTab] = useState('1');
   const [pointsDiscussion, setPointsDiscussion] = useState([]);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -68,20 +70,44 @@ const TopicCardTab = ({ topic }) => {
     fetchPointsDiscussion();
   }, [fetchPointsDiscussion]);
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    if (minutes === 0) {
+      return `${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''}`;
+    } else if (minutes === 1) {
+      return `${minutes} minute ${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''}`;
+    } else {
+      return `${minutes} minutes ${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''}`;
+    }
+  };
+  
   const startStopwatch = () => {
-    const id = setInterval(() => {
-      setElapsedTime((prevTime) => prevTime + 1);
+    if (stopwatchInterval) clearInterval(stopwatchInterval);
+    setElapsedTime(0);
+    const interval = setInterval(() => {
+      setElapsedTime(prevTime => prevTime + 1);
     }, 1000);
-    setTimerId(id);
+    setStopwatchInterval(interval);
   };
 
   const stopStopwatch = () => {
-    if (timerId) {
-      clearInterval(timerId);
-      setTimerId(null);
-    }
-    setElapsedTime(0);
-    setCurrentActivity('');
+    if (stopwatchInterval) clearInterval(stopwatchInterval);
+    setStopwatchInterval(null);
+  };
+
+  const startTotalStopwatch = () => {
+    if (totalStopwatchInterval) clearInterval(totalStopwatchInterval);
+    setTotalElapsedTime(0);
+    const interval = setInterval(() => {
+      setTotalElapsedTime(prevTime => prevTime + 1);
+    }, 1000);
+    setTotalStopwatchInterval(interval);
+  };
+
+  const stopTotalStopwatch = () => {
+    if (totalStopwatchInterval) clearInterval(totalStopwatchInterval);
+    setTotalStopwatchInterval(null);
   };
 
   const handleElaborate = async () => {
@@ -217,7 +243,76 @@ const handleQuizGeneration = async () => {
   setIsLoading(false);
   stopStopwatch();
 };
-  
+
+const handleExecuteAll = async () => {
+  setExecutingAll(true);
+  setIsLoading(true);
+  startTotalStopwatch();
+
+  try {
+    // Elaborate
+    setCurrentActivity('Elaborating Points');
+    startStopwatch();
+    const elaborateResponse = await axios.post('http://localhost:8000/api/elaborate-points', {
+      topic: topic.topic_name,
+      objective: topic.objective,
+      points_of_discussion: topic.point_of_discussion
+    });
+    if (elaborateResponse.status !== 200) throw new Error('Elaboration failed');
+    await fetchPointsDiscussion(true);
+    stopStopwatch();
+
+    // Prompting
+    setCurrentActivity('Generating Prompting');
+    startStopwatch();
+    const promptingResponse = await axios.post('http://localhost:8000/api/generate-topic-prompting', {
+      topic_id: topic._id
+    });
+    if (promptingResponse.status !== 200) throw new Error('Prompting generation failed');
+    await fetchPointsDiscussion(true);
+    stopStopwatch();
+
+    // Handout
+    setCurrentActivity('Generating Handout');
+    startStopwatch();
+    const handoutResponse = await axios.post('http://localhost:8000/api/generate-topic-handout', {
+      topic_id: topic._id
+    });
+    if (handoutResponse.status !== 200) throw new Error('Handout generation failed');
+    await fetchPointsDiscussion(true);
+    stopStopwatch();
+
+    // Misc Points
+    setCurrentActivity('Generating Objective - Method - Duration');
+    startStopwatch();
+    const miscResponse = await axios.post('http://localhost:8000/api/generate-topic-misc', {
+      topic_id: topic._id
+    });
+    if (miscResponse.status !== 200) throw new Error('Misc points generation failed');
+    await fetchPointsDiscussion(true);
+    stopStopwatch();
+
+    // Quiz
+    setCurrentActivity('Generating Quiz');
+    startStopwatch();
+    const quizResponse = await axios.post('http://localhost:8000/api/generate-topic-quiz', {
+      topic_id: topic._id
+    });
+    if (quizResponse.status !== 200) throw new Error('Quiz generation failed');
+    await fetchPointsDiscussion(true);
+    stopStopwatch();
+
+    showAlert('All processes completed successfully', 'success');
+  } catch (error) {
+    console.error('Error in Execute All process:', error);
+    showAlert(`Error: ${error.message}`, 'danger');
+  } finally {
+    setIsLoading(false);
+    setExecutingAll(false);
+    stopTotalStopwatch();
+  }
+};
+
 
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -252,7 +347,7 @@ const handleQuizGeneration = async () => {
         <Row>
           <Col md="3">
             <Nav vertical pills>
-              {['Overview', 'Elaboration', 'Prompting', 'Handout', 'Learning Objective', 'Assessment', 'Method', 'Quiz', 'Studi Kasus', 'Bahan Diskusi', 'Outline Presentasi', 'Script Bicara', 'Actions'].map((item, index) => (
+              {['Overview', 'Elaboration', 'Prompting', 'Handout', 'Learning Objective', 'Assessment', 'Method', 'Quiz', 'Slide', 'Actions'].map((item, index) => (
                 <NavItem key={index}>
                   <NavLink
                     className={activeTab === `${index + 1}` ? 'active' : ''}
@@ -285,11 +380,18 @@ const handleQuizGeneration = async () => {
               <TabPane tabId="6">{renderAccordion('assessment', 'assessment')}</TabPane>
               <TabPane tabId="7">{renderAccordion('method', 'method')}</TabPane>
               <TabPane tabId="8">{renderAccordion('quiz', 'quiz')}</TabPane>
-              <TabPane tabId="9">{renderAccordion('casestudy', 'casestudy')}</TabPane>
-              <TabPane tabId="10">{renderAccordion('discussion', 'discussion')}</TabPane>
-              <TabPane tabId="11">{renderAccordion('outline', 'outline')}</TabPane>
-              <TabPane tabId="12">{renderAccordion('script', 'script')}</TabPane>
-              <TabPane tabId="13">
+              <TabPane tabId="9">{renderAccordion('slide', 'slide')}</TabPane>
+              <TabPane tabId="10">
+              <Button 
+                    color="primary" 
+                    className="mb-3 w-100" 
+                    size="lg"
+                    onClick={handleExecuteAll}
+                    disabled={executingAll || isLoading}
+                  >
+                    EXECUTE ALL
+                  </Button>
+
                 <Button color="primary" className="mb-2 w-100" onClick={handleElaborate} disabled={elaborateLoading}>
                   {elaborateLoading ? 'Generating...' : 'Elaborate'}
                 </Button>
@@ -320,7 +422,10 @@ const handleQuizGeneration = async () => {
         {isLoading && (
           <div className="d-flex flex-column align-items-center">
             <Loader className="mb-2" />
-            <P>{currentActivity} | Time elapsed: {elapsedTime} seconds</P>
+            <P>{currentActivity} | Time elapsed: {formatTime(elapsedTime)}</P>
+            {executingAll && (
+              <P>Total time elapsed: {formatTime(totalElapsedTime)}</P>
+            )}
           </div>
         )}
       </CardFooter>
