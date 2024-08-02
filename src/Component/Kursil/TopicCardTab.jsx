@@ -4,7 +4,8 @@ import { Card, CardHeader, CardBody, CardFooter, Row, Col, Button, Alert, Nav, N
 import { H5, P } from '../../AbstractElements';
 import styled from 'styled-components';
 import axios from 'axios';
-import Markdown from 'markdown-to-jsx';
+import ReactMarkdown from 'react-markdown';
+
 
 const StyledUl = styled.ul`
   list-style-type: disc;
@@ -28,6 +29,49 @@ const Loader = styled.div`
     100% { background-size: 120% }
   }
 `;
+
+const MarkdownRenderer = ({ children }) => (
+  <ReactMarkdown
+    components={{
+      h1: ({ node, ...props }) => <H5 {...props} />,
+      h2: ({ node, ...props }) => <H5 {...props} />,
+      h3: ({ node, ...props }) => <H5 className="mt-3" {...props} />,
+      p: ({ node, ...props }) => <P {...props} />,
+      ul: ({ node, ...props }) => <StyledUl {...props} />,
+      ol: ({ node, ...props }) => <ol className="pl-4" {...props} />,
+      li: ({ node, ...props }) => <li className="mb-2" {...props} />
+    }}
+  >
+    {children}
+  </ReactMarkdown>
+);
+
+// This is to fix messed up display of markdown
+const processText = (text) => {
+  if (!text) return '';
+
+  let lines = text.split('\n');
+
+  lines = lines.map((line, index) => {
+    // Add three newlines before and one after numbered headings, preserving markdown
+    if (/^\d+\.\s+\*\*/.test(line)) {
+      // If it's not the first line and the previous line isn't already blank, add three newlines before
+      if (index > 0 && lines[index - 1].trim() !== '') {
+        line = '\n\n\n' + line;
+      }
+      return line + '\n';
+    }
+    
+    // Remove space before dash in list items, preserving markdown
+    if (/^\s+-\s/.test(line)) {
+      return line.replace(/^\s+-/, '-');
+    }
+    
+    return line;
+  });
+
+  return lines.join('\n');
+};
 
 const TopicCardTab = ({ topic }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -357,9 +401,9 @@ const handleExecuteAll = async () => {
         <AccordionItem key={index}>
           <AccordionHeader targetId={`${contentKey}${index}`}>{point.point_of_discussion}</AccordionHeader>
           <AccordionBody accordionId={`${contentKey}${index}`}>
-            <Markdown>
-              {point[contentKey] || `No ${contentKey} content available.`}
-            </Markdown>
+            <MarkdownRenderer>
+              {processText(point[contentKey] || `No ${contentKey} content available.`)}
+            </MarkdownRenderer>
           </AccordionBody>
         </AccordionItem>
       ))}
