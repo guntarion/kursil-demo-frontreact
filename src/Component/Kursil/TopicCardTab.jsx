@@ -42,6 +42,7 @@ const TopicCardTab = ({ topic }) => {
   const [contentLoading, setContentLoading] = useState(false);
   const [miscLoading, setMiscLoading] = useState(false);
   const [quizLoading, setQuizLoading] = useState(false);
+  const [translateLoading, setTranslateLoading] = useState(false);
   const [executingAll, setExecutingAll] = useState(false);
   const [activeTab, setActiveTab] = useState('1');
   const [pointsDiscussion, setPointsDiscussion] = useState([]);
@@ -244,6 +245,34 @@ const handleQuizGeneration = async () => {
   stopStopwatch();
 };
 
+
+const handleTranslateHandout = async () => {
+  setIsLoading(true);
+  setTranslateLoading(true);
+  setCurrentActivity('Translating Handout');
+  startStopwatch();
+
+  try {
+    const response = await axios.post('http://localhost:8000/api/translate-handout', {
+      topic_id: topic._id
+    });
+
+    if (response.status === 200) {
+      await fetchPointsDiscussion(true);
+      showAlert('Translating Handout completed successfully', 'success');
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error Translating Handout:', error);
+    showAlert(`Error Translating Handout: ${error.message}`, 'danger');
+  }
+
+  setTranslateLoading(false);
+  setIsLoading(false);
+  stopStopwatch();
+};
+
 const handleExecuteAll = async () => {
   setExecutingAll(true);
   setIsLoading(true);
@@ -347,7 +376,7 @@ const handleExecuteAll = async () => {
         <Row>
           <Col md="3">
             <Nav vertical pills>
-              {['Overview', 'Elaboration', 'Prompting', 'Handout', 'Learning Objective', 'Assessment', 'Method', 'Quiz', 'Slide', 'Actions'].map((item, index) => (
+              {['Overview', 'Elaboration', 'Prompting', 'Handout', 'Handout [id]', 'Learning Objective', 'Assessment', 'Method', 'Quiz', 'Slide', 'Actions'].map((item, index) => (
                 <NavItem key={index}>
                   <NavLink
                     className={activeTab === `${index + 1}` ? 'active' : ''}
@@ -376,12 +405,13 @@ const handleExecuteAll = async () => {
               <TabPane tabId="2">{renderAccordion('elaboration', 'elaboration')}</TabPane>
               <TabPane tabId="3">{renderAccordion('prompting', 'prompting')}</TabPane>
               <TabPane tabId="4">{renderAccordion('handout', 'handout')}</TabPane>
-              <TabPane tabId="5">{renderAccordion('learn_objective', 'learn_objective')}</TabPane>
-              <TabPane tabId="6">{renderAccordion('assessment', 'assessment')}</TabPane>
-              <TabPane tabId="7">{renderAccordion('method', 'method')}</TabPane>
-              <TabPane tabId="8">{renderAccordion('quiz', 'quiz')}</TabPane>
-              <TabPane tabId="9">{renderAccordion('slide', 'slide')}</TabPane>
-              <TabPane tabId="10">
+              <TabPane tabId="5">{renderAccordion('handout_id', 'handout_id')}</TabPane>
+              <TabPane tabId="6">{renderAccordion('learn_objective', 'learn_objective')}</TabPane>
+              <TabPane tabId="7">{renderAccordion('assessment', 'assessment')}</TabPane>
+              <TabPane tabId="8">{renderAccordion('method', 'method')}</TabPane>
+              <TabPane tabId="9">{renderAccordion('quiz', 'quiz')}</TabPane>
+              <TabPane tabId="10">{renderAccordion('slide', 'slide')}</TabPane>
+              <TabPane tabId="11">
               <Button 
                     color="primary" 
                     className="mb-3 w-100" 
@@ -406,6 +436,9 @@ const handleExecuteAll = async () => {
                 </Button>
                 <Button color="primary" className="mb-2 w-100" onClick={handleQuizGeneration} disabled={quizLoading}>
                   {quizLoading ? 'Generating...' : 'Quiz'}
+                </Button>
+                <Button color="primary" className="mb-2 w-100" onClick={handleTranslateHandout} disabled={translateLoading}>
+                  {translateLoading ? 'Generating...' : 'Translate Handout'}
                 </Button>
                 <Button color="success" className="mb-2 w-100">Presentation</Button>
               </TabPane>
