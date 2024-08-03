@@ -10,11 +10,12 @@ const MainTopicDetailPage = () => {
   const { id } = useParams();
   const [mainTopic, setMainTopic] = useState(null);
   const [listTopics, setListTopics] = useState([]);
-  const [generating, setGenerating] = useState({ kursil: false, handout: false });
+  const [generating, setGenerating] = useState({ kursil: false, handout: false, powerpoint: false });
   const [alert, setAlert] = useState({ visible: false, message: '', color: 'success' });
 
   useEffect(() => {
     fetchMainTopicDetails();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchMainTopicDetails = async () => {
@@ -44,7 +45,11 @@ const MainTopicDetailPage = () => {
   };
 
   const downloadDocument = (type) => {
-    window.open(`http://localhost:8000/api/download-document/${id}/${type}`, '_blank');
+    let documentType = type;
+    if (type === 'powerpoint') {
+      documentType = 'presentation';  // Assuming the backend uses 'presentation' for PowerPoint documents
+    }
+    window.open(`http://localhost:8000/api/download-document/${id}/${documentType}`, '_blank');
   };
 
   const showAlert = (message, color) => {
@@ -72,18 +77,32 @@ const MainTopicDetailPage = () => {
                 <p><strong>Cost:</strong> {mainTopic.cost.toFixed(2)} IDR</p>
                 <p><strong>Objective:</strong> {mainTopic.main_topic_objective}</p>
                 <div className="mt-4 mb-3">
-                  <Button color="primary" onClick={() => generateDocument('kursil')} disabled={generating.kursil} className="me-2">
-                    {generating.kursil ? 'Generating...' : 'Generate Kursil'}
-                  </Button>
-                  <Button color="secondary" onClick={() => downloadDocument('kursil')} disabled={!mainTopic.latest_kursil_document} className="me-2">
-                    Download Kursil
-                  </Button>
-                  <Button color="primary" onClick={() => generateDocument('handout')} disabled={generating.handout} className="me-2">
-                    {generating.handout ? 'Generating...' : 'Generate Handout'}
-                  </Button>
-                  <Button color="secondary" onClick={() => downloadDocument('handout')} disabled={!mainTopic.latest_handout_document}>
-                    Download Handout
-                  </Button>
+                  <Row>
+                    <Col md={4} className="mb-2">
+                      <Button color="primary" onClick={() => generateDocument('kursil')} disabled={generating.kursil} className="w-100 mb-2">
+                        {generating.kursil ? 'Generating...' : 'Generate Kursil'}
+                      </Button>
+                      <Button color="secondary" onClick={() => downloadDocument('kursil')} disabled={!mainTopic.latest_kursil_document} className="w-100">
+                        Download Kursil
+                      </Button>
+                    </Col>
+                    <Col md={4} className="mb-2">
+                      <Button color="primary" onClick={() => generateDocument('handout')} disabled={generating.handout} className="w-100 mb-2">
+                        {generating.handout ? 'Generating...' : 'Generate Handout'}
+                      </Button>
+                      <Button color="secondary" onClick={() => downloadDocument('handout')} disabled={!mainTopic.latest_handout_document} className="w-100">
+                        Download Handout
+                      </Button>
+                    </Col>
+                    <Col md={4} className="mb-2">
+                      <Button color="primary" onClick={() => generateDocument('powerpoint')} disabled={generating.powerpoint} className="w-100 mb-2">
+                        {generating.powerpoint ? 'Generating...' : 'Generate PowerPoint'}
+                      </Button>
+                      <Button color="secondary" onClick={() => downloadDocument('powerpoint')} disabled={!mainTopic.latest_powerpoint_document} className="w-100">
+                        Download PowerPoint
+                      </Button>
+                    </Col>
+                  </Row>
                 </div>
                 <h4 className="mt-4 mb-3">List of Topics:</h4>
                 {listTopics.map((topic, index) => (
