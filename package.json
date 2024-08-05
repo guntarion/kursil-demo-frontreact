@@ -142,6 +142,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "babel-loader": "^8.2.5",
     "eslint-plugin-react": "^7.30.0"
   }
