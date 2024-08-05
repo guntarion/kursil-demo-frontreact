@@ -11,7 +11,8 @@ const MainTopicPage = () => {
   useEffect(() => {
     const fetchMainTopics = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/main-topics/');
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/main-topics/`);
+        // const response = await axios.get('http://localhost:8000/api/main-topics/');
         setMainTopics(response.data);
       } catch (error) {
         console.error('Error fetching main topics:', error);
@@ -39,7 +40,7 @@ const MainTopicPage = () => {
                     Cost: {topic.cost.toFixed(2)} IDR
                   </CardText>
                   <Link 
-                    to={`/zeta/kursil/main-topic/${topic._id}`}
+                    to={`/kursil/main-topic/${topic._id}`}
                     className="btn btn-primary mt-auto"
                   >
                     View Details

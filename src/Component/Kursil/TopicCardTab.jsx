@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 
+const API_URL = process.env.REACT_APP_API_URL;
 
 const StyledUl = styled.ul`
   list-style-type: disc;
@@ -100,7 +101,8 @@ const TopicCardTab = ({ topic }) => {
 
   const fetchPointsDiscussion = useCallback(async (showUpdateAlert = false) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/points-discussion/${topic._id}`);
+      const response = await axios.get(`${API_URL}/points-discussion/${topic._id}`);
+      // const response = await axios.get(`http://localhost:8000/api/points-discussion/${topic._id}`);
       setPointsDiscussion(response.data);
       if (showUpdateAlert) {
         showAlert('Points of discussion updated successfully', 'success');
@@ -161,7 +163,7 @@ const TopicCardTab = ({ topic }) => {
     setCurrentActivity('Elaborating Points');
     startStopwatch();
     try {
-      const response = await axios.post('http://localhost:8000/api/elaborate-points', {
+      const response = await axios.post(`${API_URL}/elaborate-points`, {
         topic: topic.topic_name,
         objective: topic.objective,
         points_of_discussion: topic.point_of_discussion
@@ -187,7 +189,7 @@ const TopicCardTab = ({ topic }) => {
     startStopwatch();
 
     try {
-      const response = await axios.post('http://localhost:8000/api/generate-topic-prompting', {
+      const response = await axios.post(`${API_URL}/generate-topic-prompting`, {
         topic_id: topic._id
       });
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -215,7 +217,7 @@ const handleHandout = async () => {
   startStopwatch();
 
   try {
-    const response = await axios.post('http://localhost:8000/api/generate-topic-handout', {
+    const response = await axios.post(`${API_URL}/generate-topic-handout`, {
       topic_id: topic._id
     });
 
@@ -242,7 +244,7 @@ const handleMiscPoints = async () => {
   startStopwatch();
 
   try {
-    const response = await axios.post('http://localhost:8000/api/generate-topic-misc', {
+    const response = await axios.post(`${API_URL}/generate-topic-misc`, {
       topic_id: topic._id
     });
 
@@ -269,7 +271,7 @@ const handleQuizGeneration = async () => {
   startStopwatch();
 
   try {
-    const response = await axios.post('http://localhost:8000/api/generate-topic-quiz', {
+    const response = await axios.post(`${API_URL}/generate-topic-quiz`, {
       topic_id: topic._id
     });
 
@@ -297,7 +299,7 @@ const handleTranslateHandout = async () => {
   startStopwatch();
 
   try {
-    const response = await axios.post('http://localhost:8000/api/translate-handout', {
+    const response = await axios.post(`${API_URL}/translate-handout`, {
       topic_id: topic._id
     });
 
@@ -326,7 +328,7 @@ const handleExecuteAll = async () => {
     // Elaborate
     setCurrentActivity('Elaborating Points');
     startStopwatch();
-    const elaborateResponse = await axios.post('http://localhost:8000/api/elaborate-points', {
+    const elaborateResponse = await axios.post(`${API_URL}/elaborate-points`, {
       topic: topic.topic_name,
       objective: topic.objective,
       points_of_discussion: topic.point_of_discussion
@@ -338,7 +340,7 @@ const handleExecuteAll = async () => {
     // Prompting
     setCurrentActivity('Generating Prompting');
     startStopwatch();
-    const promptingResponse = await axios.post('http://localhost:8000/api/generate-topic-prompting', {
+    const promptingResponse = await axios.post(`${API_URL}/generate-topic-prompting`, {
       topic_id: topic._id
     });
     if (promptingResponse.status !== 200) throw new Error('Prompting generation failed');
@@ -348,7 +350,7 @@ const handleExecuteAll = async () => {
     // Handout
     setCurrentActivity('Generating Handout');
     startStopwatch();
-    const handoutResponse = await axios.post('http://localhost:8000/api/generate-topic-handout', {
+    const handoutResponse = await axios.post(`${API_URL}/generate-topic-handout`, {
       topic_id: topic._id
     });
     if (handoutResponse.status !== 200) throw new Error('Handout generation failed');
@@ -358,7 +360,7 @@ const handleExecuteAll = async () => {
     // Misc Points
     setCurrentActivity('Generating Objective - Method - Duration');
     startStopwatch();
-    const miscResponse = await axios.post('http://localhost:8000/api/generate-topic-misc', {
+    const miscResponse = await axios.post(`${API_URL}/generate-topic-misc`, {
       topic_id: topic._id
     });
     if (miscResponse.status !== 200) throw new Error('Misc points generation failed');
@@ -368,7 +370,7 @@ const handleExecuteAll = async () => {
     // Quiz
     setCurrentActivity('Generating Quiz');
     startStopwatch();
-    const quizResponse = await axios.post('http://localhost:8000/api/generate-topic-quiz', {
+    const quizResponse = await axios.post(`${API_URL}/generate-topic-quiz`, {
       topic_id: topic._id
     });
     if (quizResponse.status !== 200) throw new Error('Quiz generation failed');
@@ -481,6 +483,7 @@ const handleExecuteAll = async () => {
                 <Button color="primary" className="mb-2 w-100" onClick={handleQuizGeneration} disabled={quizLoading}>
                   {quizLoading ? 'Generating...' : 'Quiz'}
                 </Button>
+                <hr />
                 <Button color="primary" className="mb-2 w-100" onClick={handleTranslateHandout} disabled={translateLoading}>
                   {translateLoading ? 'Generating...' : 'Translate Handout'}
                 </Button>

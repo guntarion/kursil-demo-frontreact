@@ -6,6 +6,8 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import TopicCardTab from '../../Component/Kursil/TopicCardTab';
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const MainTopicDetailPage = () => {
   const { id } = useParams();
   const [mainTopic, setMainTopic] = useState(null);
@@ -20,7 +22,8 @@ const MainTopicDetailPage = () => {
 
   const fetchMainTopicDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/main-topics/${id}`);
+      const response = await axios.get(`${API_URL}/main-topics/${id}`);
+      // const response = await axios.get(`http://localhost:8000/api/main-topics/${id}`);
       setMainTopic(response.data.main_topic);
       setListTopics(response.data.list_topics);
     } catch (error) {
@@ -32,7 +35,8 @@ const MainTopicDetailPage = () => {
   const generateDocument = async (type) => {
     setGenerating({ ...generating, [type]: true });
     try {
-      const response = await axios.post(`http://localhost:8000/api/generate-${type}-document`, { main_topic_id: id });
+      const response = await axios.post(`${API_URL}/generate-${type}-document`, { main_topic_id: id });
+      // const response = await axios.post(`http://localhost:8000/api/generate-${type}-document`, { main_topic_id: id });
       if (response.status === 200) {
         showAlert(`${type.charAt(0).toUpperCase() + type.slice(1)} document generated successfully`, 'success');
         fetchMainTopicDetails();  // Refresh main topic details to get updated document paths
@@ -49,7 +53,8 @@ const MainTopicDetailPage = () => {
     if (type === 'powerpoint') {
       documentType = 'presentation';  // Assuming the backend uses 'presentation' for PowerPoint documents
     }
-    window.open(`http://localhost:8000/api/download-document/${id}/${documentType}`, '_blank');
+    window.open(`${API_URL}/download-document/${id}/${documentType}`, '_blank');
+    // window.open(`http://localhost:8000/api/download-document/${id}/${documentType}`, '_blank');
   };
 
   const showAlert = (message, color) => {

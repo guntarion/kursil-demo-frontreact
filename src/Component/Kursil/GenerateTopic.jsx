@@ -4,6 +4,8 @@ import { Input, Button, Form, FormGroup, Label, Card, CardBody, CardTitle } from
 import axios from 'axios';
 import './GenerateTopic.css'; // Make sure to create this CSS file
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const GenerateTopic = () => {
   const [topic, setTopic] = useState('');
   const [generatedContent, setGeneratedContent] = useState([]);
@@ -19,7 +21,8 @@ const GenerateTopic = () => {
     setSummary('');
 
     try {
-      const response = await axios.post('http://localhost:8000/api/list-of-topics/', { topic });
+      const response = await axios.post(`${API_URL}/list-of-topics/`, { topic });
+      // const response = await axios.post('http://localhost:8000/api/list-of-topics/', { topic });
       if (response.data && response.data.generated_content) {
         setGeneratedContent(response.data.generated_content);
         setCost(response.data.cost);
