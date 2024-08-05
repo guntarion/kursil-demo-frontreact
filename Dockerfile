@@ -13,6 +13,8 @@ RUN npm install
 # Copy the rest of the application code into the container
 COPY . .
 
+COPY build ./build
+
 # Build the React application
 RUN npm run build
 
