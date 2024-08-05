@@ -88,9 +88,11 @@ const TopicCardTab = ({ topic }) => {
   const [miscLoading, setMiscLoading] = useState(false);
   const [quizLoading, setQuizLoading] = useState(false);
   const [translateLoading, setTranslateLoading] = useState(false);
+  const [analogyLoading, setAnalogyLoading] = useState(false);
   const [executingAll, setExecutingAll] = useState(false);
   const [activeTab, setActiveTab] = useState('1');
   const [pointsDiscussion, setPointsDiscussion] = useState([]);
+  const [topicAnalogy, setTopicAnalogy] = useState('');
   const [openAccordion, setOpenAccordion] = useState(null);
   const [alert, setAlert] = useState({ visible: false, message: '', color: 'success' });
 
@@ -104,12 +106,19 @@ const TopicCardTab = ({ topic }) => {
       const response = await axios.get(`${API_URL}/points-discussion/${topic._id}`);
       // const response = await axios.get(`http://localhost:8000/api/points-discussion/${topic._id}`);
       setPointsDiscussion(response.data);
+
+      // Fetch the topic details to get the analogy
+      const topicResponse = await axios.get(`${API_URL}/topic/${topic._id}`);
+      if (topicResponse.data && topicResponse.data.topic_analogy) {
+        setTopicAnalogy(topicResponse.data.topic_analogy);
+      }
+
       if (showUpdateAlert) {
         showAlert('Points of discussion updated successfully', 'success');
       }
     } catch (error) {
       console.error('Data points of discussion is not available:', error);
-      showAlert(`Data points of discussion is not available ${showUpdateAlert ? 'updated ' : ''}`, 'danger');
+      showAlert(`Data points of discussion is not available ${showUpdateAlert ? 'updated ' : ''}`, 'light');
     }
   }, [topic._id, showAlert]);
 
@@ -319,6 +328,51 @@ const handleTranslateHandout = async () => {
   stopStopwatch();
 };
 
+// const fetchTopicAnalogy = async () => {
+//   try {
+//     const response = await axios.get(`${API_URL}/topic/${topic._id}`);
+//     if (response.data && response.data.topic_analogy) {
+//       // Update the state with the new analogy
+//       setTopicAnalogy(response.data.topic_analogy);
+//     } else {
+//       console.warn('No analogy found for this topic');
+//     }
+//   } catch (error) {
+//     console.error('Error fetching topic analogy:', error);
+//     showAlert('Error fetching topic analogy', 'danger');
+//   }
+// };
+
+// Update the handleAnalogy function
+const handleAnalogy = async () => {
+  setIsLoading(true);
+  setAnalogyLoading(true);
+  setCurrentActivity('Generate Analogy');
+  startStopwatch();
+
+  try {
+    const response = await axios.post(`${API_URL}/generate-analogy`, {
+      topic_id: topic._id
+    });
+
+    if (response.status === 200) {
+      await fetchPointsDiscussion(true);
+      showAlert('Generate Analogy completed successfully', 'success');
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error Generate Analogy:', error);
+    showAlert(`Error Generate Analogy: ${error.message}`, 'danger');
+  }
+
+  setAnalogyLoading(false);
+  setIsLoading(false);
+  stopStopwatch();
+};
+
+
+
 const handleExecuteAll = async () => {
   setExecutingAll(true);
   setIsLoading(true);
@@ -422,7 +476,7 @@ const handleExecuteAll = async () => {
         <Row>
           <Col md="3">
             <Nav vertical pills>
-              {['Overview', 'Elaboration', 'Prompting', 'Handout', 'Handout [id]', 'Learning Objective', 'Assessment', 'Method', 'Quiz', 'Slide', 'Actions'].map((item, index) => (
+              {['Overview', 'Elaboration', 'Prompting', 'Handout', 'Handout [id]', 'Learning Objective', 'Assessment', 'Method', 'Quiz', 'Analogy', 'Actions'].map((item, index) => (
                 <NavItem key={index}>
                   <NavLink
                     className={activeTab === `${index + 1}` ? 'active' : ''}
@@ -456,7 +510,16 @@ const handleExecuteAll = async () => {
               <TabPane tabId="7">{renderAccordion('assessment', 'assessment')}</TabPane>
               <TabPane tabId="8">{renderAccordion('method', 'method')}</TabPane>
               <TabPane tabId="9">{renderAccordion('quiz', 'quiz')}</TabPane>
-              <TabPane tabId="10">{renderAccordion('slide', 'slide')}</TabPane>
+              <TabPane tabId="10">
+                <H5>Analogy:</H5>
+                {topicAnalogy ? (
+                  <MarkdownRenderer>
+                    {processText(topicAnalogy)}
+                  </MarkdownRenderer>
+                ) : (
+                  <P>No analogy available for this topic.</P>
+                )}
+              </TabPane>
               <TabPane tabId="11">
               <Button 
                     color="primary" 
@@ -487,7 +550,9 @@ const handleExecuteAll = async () => {
                 <Button color="primary" className="mb-2 w-100" onClick={handleTranslateHandout} disabled={translateLoading}>
                   {translateLoading ? 'Generating...' : 'Translate Handout'}
                 </Button>
-                <Button color="success" className="mb-2 w-100">Presentation</Button>
+                <Button color="success" className="mb-2 w-100" onClick={handleAnalogy} disabled={analogyLoading}>
+                  {analogyLoading ? 'Generating...' : 'Generate Analogy'}
+                </Button>
               </TabPane>
             </TabContent>
           </Col>
