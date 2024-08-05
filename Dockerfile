@@ -1,25 +1,34 @@
-# Use the official Node.js image from the Docker Hub
-FROM node:18-slim
+# Build stage
+FROM node:18-slim as build
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files into the container
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install the required dependencies
-RUN npm install
+# Install dependencies
+RUN npm ci
 
-# Copy the rest of the application code into the container
+# Copy the rest of the code
 COPY . .
 
-COPY build ./build
+# Set the homepage
+RUN sed -i 's#"homepage": ".*"#"homepage": "/zeta/"#g' package.json
 
-# Build the React application
+# Build the app
 RUN npm run build
 
-# Install a lightweight web server to serve the React application
+# Production stage
+FROM node:18-slim
+
+WORKDIR /app
+
+# Install serve
 RUN npm install -g serve
 
-# Command to run the web server
+# Copy build from the 'build' stage
+COPY --from=build /app/build ./build
+
+# Start the app
 CMD ["serve", "-s", "build", "-l", "3000"]
