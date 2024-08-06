@@ -1,3 +1,5 @@
+// src/Components/Pages/KursilPage/MainTopicPage.jsx
+
 import React, { Fragment, useState, useEffect } from 'react';
 import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Badge, CardImg } from 'reactstrap';
 import { Breadcrumbs } from '../../AbstractElements';
@@ -10,16 +12,10 @@ const MainTopicPage = () => {
   const [mainTopics, setMainTopics] = useState([]);
 
   useEffect(() => {
-    console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-
     const fetchMainTopics = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/main-topics/`);
         setMainTopics(response.data);
-        
-        response.data.forEach(topic => {
-          console.log(`Topic: ${topic.main_topic}, Image Link: ${topic.link_image_icon}, Total Cost: ${topic.total_cost}`);
-        });
       } catch (error) {
         console.error('Error fetching main topics:', error);
       }
@@ -31,6 +27,10 @@ const MainTopicPage = () => {
   const handleImageError = (e, topicName) => {
     console.error(`Error loading image for topic: ${topicName}`);
     e.target.src = DEFAULT_IMAGE;
+  };
+
+  const formatCurrency = (amount) => {
+    return `Rp ${amount.toLocaleString('id-ID')}`;
   };
 
   return (
@@ -54,10 +54,6 @@ const MainTopicPage = () => {
                     <span className="me-2">📚</span>
                     {topic.main_topic}
                   </CardTitle>
-                  <CardText className="text-muted mb-3">
-                    <span className="me-1">💰</span>
-                    Total Cost: {topic.total_cost ? topic.total_cost.toFixed(2) : '0.00'} IDR
-                  </CardText>
                   <Link 
                     to={`/kursil/main-topic/${topic._id}`}
                     className="btn btn-primary mt-auto"
@@ -69,7 +65,7 @@ const MainTopicPage = () => {
                   color="info" 
                   className="position-absolute top-0 end-0 m-2"
                 >
-                  Topic
+                  {formatCurrency(topic.total_cost || 0)}
                 </Badge>
               </Card>
             </Col>
