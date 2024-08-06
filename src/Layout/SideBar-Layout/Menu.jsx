@@ -30,7 +30,7 @@ export const MENUITEMS = [
                 {
                   active: false,
                   path: `${process.env.PUBLIC_URL}/kursil/main-topics`,
-                  title: 'Main Topic',
+                  title: 'The Main Topics',
                   type: 'link',
                 },
                 
