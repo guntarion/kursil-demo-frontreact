@@ -9,6 +9,13 @@ const MainTopicPage = () => {
   const [mainTopics, setMainTopics] = useState([]);
 
   useEffect(() => {
+    
+    // Debug: Log the API URL
+    console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+
+    // Debug: Alert the API URL
+    // alert(`REACT_APP_API_URL: ${process.env.REACT_APP_API_URL}`);
+
     const fetchMainTopics = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/main-topics/`);

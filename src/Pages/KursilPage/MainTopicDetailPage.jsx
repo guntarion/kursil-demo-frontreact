@@ -16,7 +16,27 @@ const MainTopicDetailPage = () => {
   const [alert, setAlert] = useState({ visible: false, message: '', color: 'success' });
 
   useEffect(() => {
-    fetchMainTopicDetails();
+    let isMounted = true;
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/main-topics/${id}`);
+        if (isMounted) {
+          setMainTopic(response.data.main_topic);
+          setListTopics(response.data.list_topics);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Error fetching main topic details:', error);
+          showAlert('Error fetching main topic details', 'danger');
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
