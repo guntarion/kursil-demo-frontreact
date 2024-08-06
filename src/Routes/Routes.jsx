@@ -6,6 +6,9 @@ import SamplePage from '../Pages/Sample Page';
 import GenerateTopicPage from '../Pages/KursilPage/GenerateTopicPage';
 import MainTopicPage from "../Pages/KursilPage/MainTopicPage";
 import MainTopicDetailPage from "../Pages/KursilPage/MainTopicDetailPage"; 
+import RagPage from "../Pages/KursilPage/RagPage"; 
+import KursilVsJobdescPage from "../Pages/KursilPage/KursilVsJobdescPage"; 
+import NarrationPage from "../Pages/KursilPage/NarrationPage"; 
 // import Task from "../Application/Task";
 // import BasicCards from "../Bonus-Ui/Cards/BasicCards/index";
 
@@ -17,6 +20,9 @@ export const routes = [
     { path: `${process.env.PUBLIC_URL}/kursil/generate-topic`, Component: <GenerateTopicPage /> },
     { path: `${process.env.PUBLIC_URL}/kursil/main-topics`, Component: <MainTopicPage /> },
     { path: `${process.env.PUBLIC_URL}/kursil/main-topic/:id`, Component: <MainTopicDetailPage /> },
+    { path: `${process.env.PUBLIC_URL}/fitur/rag`, Component: <RagPage /> },
+    { path: `${process.env.PUBLIC_URL}/fitur/vsjobdesc`, Component: <KursilVsJobdescPage /> },
+    { path: `${process.env.PUBLIC_URL}/fitur/narasi`, Component: <NarrationPage /> },
     // { path: `${process.env.PUBLIC_URL}/app/task/:layout`, Component: <Task /> },
     // { path: `${process.env.PUBLIC_URL}/card/basiccards/:layout`, Component: <BasicCards /> },
 ];
