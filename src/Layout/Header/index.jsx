@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useLayoutEffect, useContext } from 'react';
 import { Row } from 'reactstrap';
 import { Image } from '../../AbstractElements';
-import HeaderContain from './HeaderContain';
+// import HeaderContain from './HeaderContain';
 import SearchBar from './SearchBar';
 import imgg from '../../assets/images/logo/logo.png';
 import CheckContext from '../../_helper/customizer/index';
@@ -40,7 +40,7 @@ const Header = () => {
           </div>
         </div>
         <SearchBar />
-        <HeaderContain />
+        {/* <HeaderContain /> */}
       </Row>
     </Fragment>
   );

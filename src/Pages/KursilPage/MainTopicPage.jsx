@@ -1,4 +1,3 @@
-// src/Components/Pages/KursilPage/MainTopicPage.jsx
 import React, { Fragment, useState, useEffect } from 'react';
 import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Badge, CardImg } from 'reactstrap';
 import { Breadcrumbs } from '../../AbstractElements';
@@ -18,9 +17,8 @@ const MainTopicPage = () => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/main-topics/`);
         setMainTopics(response.data);
         
-        // Log image links for each topic
         response.data.forEach(topic => {
-          console.log(`Topic: ${topic.main_topic}, Image Link: ${topic.link_image_icon}`);
+          console.log(`Topic: ${topic.main_topic}, Image Link: ${topic.link_image_icon}, Total Cost: ${topic.total_cost}`);
         });
       } catch (error) {
         console.error('Error fetching main topics:', error);
@@ -58,7 +56,7 @@ const MainTopicPage = () => {
                   </CardTitle>
                   <CardText className="text-muted mb-3">
                     <span className="me-1">💰</span>
-                    Cost: {topic.cost.toFixed(2)} IDR
+                    Total Cost: {topic.total_cost ? topic.total_cost.toFixed(2) : '0.00'} IDR
                   </CardText>
                   <Link 
                     to={`/kursil/main-topic/${topic._id}`}

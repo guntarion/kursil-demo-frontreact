@@ -2,10 +2,10 @@
 import React, { Fragment } from 'react';
 import { Container, Row, Col, Card, CardBody } from 'reactstrap';
 import Breadcrumbs from '../../CommonElements/Breadcrumbs';
+import RagComponent from '../../Component/Kursil/RagComponent';
 
 const RagPage = () => {
   return (
-
     <Fragment>
       <Breadcrumbs parent="Additional Features" title="RAG" />
       <Container fluid={true}>
@@ -13,7 +13,7 @@ const RagPage = () => {
           <Col sm="12">
             <Card>
               <CardBody>
-              RagPage
+                <RagComponent />
               </CardBody>
             </Card>
           </Col>
