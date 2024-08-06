@@ -328,20 +328,6 @@ const handleTranslateHandout = async () => {
   stopStopwatch();
 };
 
-// const fetchTopicAnalogy = async () => {
-//   try {
-//     const response = await axios.get(`${API_URL}/topic/${topic._id}`);
-//     if (response.data && response.data.topic_analogy) {
-//       // Update the state with the new analogy
-//       setTopicAnalogy(response.data.topic_analogy);
-//     } else {
-//       console.warn('No analogy found for this topic');
-//     }
-//   } catch (error) {
-//     console.error('Error fetching topic analogy:', error);
-//     showAlert('Error fetching topic analogy', 'danger');
-//   }
-// };
 
 // Update the handleAnalogy function
 const handleAnalogy = async () => {
@@ -378,58 +364,21 @@ const handleExecuteAll = async () => {
   setIsLoading(true);
   startTotalStopwatch();
 
+  const processes = [
+    { name: 'Elaborating Points', endpoint: '/elaborate-points', data: { topic: topic.topic_name, objective: topic.objective, points_of_discussion: topic.point_of_discussion } },
+    { name: 'Generating Prompting', endpoint: '/generate-topic-prompting', data: { topic_id: topic._id } },
+    { name: 'Generating Handout', endpoint: '/generate-topic-handout', data: { topic_id: topic._id } },
+    { name: 'Generating Objective - Method - Duration', endpoint: '/generate-topic-misc', data: { topic_id: topic._id } },
+    { name: 'Generating Quiz', endpoint: '/generate-topic-quiz', data: { topic_id: topic._id } }
+  ];
+
   try {
-    // Elaborate
-    setCurrentActivity('Elaborating Points');
-    startStopwatch();
-    const elaborateResponse = await axios.post(`${API_URL}/elaborate-points`, {
-      topic: topic.topic_name,
-      objective: topic.objective,
-      points_of_discussion: topic.point_of_discussion
-    });
-    if (elaborateResponse.status !== 200) throw new Error('Elaboration failed');
-    await fetchPointsDiscussion(true);
-    stopStopwatch();
-
-    // Prompting
-    setCurrentActivity('Generating Prompting');
-    startStopwatch();
-    const promptingResponse = await axios.post(`${API_URL}/generate-topic-prompting`, {
-      topic_id: topic._id
-    });
-    if (promptingResponse.status !== 200) throw new Error('Prompting generation failed');
-    await fetchPointsDiscussion(true);
-    stopStopwatch();
-
-    // Handout
-    setCurrentActivity('Generating Handout');
-    startStopwatch();
-    const handoutResponse = await axios.post(`${API_URL}/generate-topic-handout`, {
-      topic_id: topic._id
-    });
-    if (handoutResponse.status !== 200) throw new Error('Handout generation failed');
-    await fetchPointsDiscussion(true);
-    stopStopwatch();
-
-    // Misc Points
-    setCurrentActivity('Generating Objective - Method - Duration');
-    startStopwatch();
-    const miscResponse = await axios.post(`${API_URL}/generate-topic-misc`, {
-      topic_id: topic._id
-    });
-    if (miscResponse.status !== 200) throw new Error('Misc points generation failed');
-    await fetchPointsDiscussion(true);
-    stopStopwatch();
-
-    // Quiz
-    setCurrentActivity('Generating Quiz');
-    startStopwatch();
-    const quizResponse = await axios.post(`${API_URL}/generate-topic-quiz`, {
-      topic_id: topic._id
-    });
-    if (quizResponse.status !== 200) throw new Error('Quiz generation failed');
-    await fetchPointsDiscussion(true);
-    stopStopwatch();
+    for (const process of processes) {
+      setCurrentActivity(process.name);
+      const response = await axios.post(`${API_URL}${process.endpoint}`, process.data);
+      if (response.status !== 200) throw new Error(`${process.name} failed`);
+      await fetchPointsDiscussion(true);
+    }
 
     showAlert('All processes completed successfully', 'success');
   } catch (error) {
@@ -567,9 +516,13 @@ const handleExecuteAll = async () => {
         {isLoading && (
           <div className="d-flex flex-column align-items-center">
             <Loader className="mb-2" />
-            <P>{currentActivity} | Time elapsed: {formatTime(elapsedTime)}</P>
-            {executingAll && (
-              <P>Total time elapsed: {formatTime(totalElapsedTime)}</P>
+            {executingAll ? (
+              <>
+                <P>{currentActivity}</P>
+                <P>Total time elapsed: {formatTime(totalElapsedTime)}</P>
+              </>
+            ) : (
+              <P>{currentActivity} | Time elapsed: {formatTime(elapsedTime)}</P>
             )}
           </div>
         )}

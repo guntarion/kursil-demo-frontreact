@@ -1,26 +1,27 @@
 // src/Components/Pages/KursilPage/MainTopicPage.jsx
 import React, { Fragment, useState, useEffect } from 'react';
-import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Badge } from 'reactstrap';
+import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Badge, CardImg } from 'reactstrap';
 import { Breadcrumbs } from '../../AbstractElements';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+
+const DEFAULT_IMAGE = 'https://bucket-titianbakat-ai-project.sgp1.cdn.digitaloceanspaces.com/kursil/webresources/icon_20240804_221729.png';
 
 const MainTopicPage = () => {
   const [mainTopics, setMainTopics] = useState([]);
 
   useEffect(() => {
-    
-    // Debug: Log the API URL
     console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-
-    // Debug: Alert the API URL
-    // alert(`REACT_APP_API_URL: ${process.env.REACT_APP_API_URL}`);
 
     const fetchMainTopics = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/main-topics/`);
-        // const response = await axios.get('http://localhost:8000/api/main-topics/');
         setMainTopics(response.data);
+        
+        // Log image links for each topic
+        response.data.forEach(topic => {
+          console.log(`Topic: ${topic.main_topic}, Image Link: ${topic.link_image_icon}`);
+        });
       } catch (error) {
         console.error('Error fetching main topics:', error);
       }
@@ -28,6 +29,11 @@ const MainTopicPage = () => {
 
     fetchMainTopics();
   }, []);
+
+  const handleImageError = (e, topicName) => {
+    console.error(`Error loading image for topic: ${topicName}`);
+    e.target.src = DEFAULT_IMAGE;
+  };
 
   return (
     <Fragment>
@@ -37,13 +43,21 @@ const MainTopicPage = () => {
           {mainTopics.map((topic) => (
             <Col key={topic._id} sm="6" md="4" lg="3">
               <Card className="h-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <CardImg 
+                  top 
+                  width="100%" 
+                  src={topic.link_image_icon || DEFAULT_IMAGE} 
+                  alt={`Icon for ${topic.main_topic}`}
+                  style={{ height: '200px', objectFit: 'cover' }}
+                  onError={(e) => handleImageError(e, topic.main_topic)}
+                />
                 <CardBody className="d-flex flex-column">
                   <CardTitle tag="h5" className="mb-3">
-                    <span className="me-2">📚</span> {/* Unicode book emoji */}
+                    <span className="me-2">📚</span>
                     {topic.main_topic}
                   </CardTitle>
                   <CardText className="text-muted mb-3">
-                    <span className="me-1">💰</span> {/* Unicode money bag emoji */}
+                    <span className="me-1">💰</span>
                     Cost: {topic.cost.toFixed(2)} IDR
                   </CardText>
                   <Link 

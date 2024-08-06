@@ -1,8 +1,8 @@
 // src/Components/Kursil/GenerateTopic.jsx
 import React, { useState } from 'react';
-import { Input, Button, Form, FormGroup, Label, Card, CardBody, CardTitle } from 'reactstrap';
+import { Input, Button, Form, FormGroup, Label, Card, CardBody, CardTitle, Alert } from 'reactstrap';
 import axios from 'axios';
-import './GenerateTopic.css'; // Make sure to create this CSS file
+import './GenerateTopic.css';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -12,6 +12,8 @@ const GenerateTopic = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [cost, setCost] = useState(null);
   const [summary, setSummary] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [alert, setAlert] = useState({ show: false, message: '', color: 'success' });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,20 +21,42 @@ const GenerateTopic = () => {
     setGeneratedContent([]);
     setCost(null);
     setSummary('');
+    setImageUrl('');
+    setAlert({ show: false, message: '', color: 'success' });
 
     try {
-      const response = await axios.post(`${API_URL}/list-of-topics/`, { topic });
-      // const response = await axios.post('http://localhost:8000/api/list-of-topics/', { topic });
-      if (response.data && response.data.generated_content) {
-        setGeneratedContent(response.data.generated_content);
-        setCost(response.data.cost);
-        setSummary(response.data.main_topic_objective);
+      // Generate topics
+      const topicResponse = await axios.post(`${API_URL}/list-of-topics/`, { topic });
+      
+      if (topicResponse.data && topicResponse.data.generated_content) {
+        setGeneratedContent(topicResponse.data.generated_content);
+        setCost(topicResponse.data.cost);
+        setSummary(topicResponse.data.main_topic_objective);
+        
+        // Generate image
+        try {
+          const imageResponse = await axios.post(`${API_URL}/generate-image`, {
+            topic: topic,
+            main_topic_id: topicResponse.data.main_topic_id
+          });
+          
+          if (imageResponse.data && imageResponse.data.image_url) {
+            setImageUrl(imageResponse.data.image_url);
+            setAlert({ show: true, message: 'Topics and image generated successfully!', color: 'success' });
+          } else {
+            setAlert({ show: true, message: 'Topics generated, but image generation failed.', color: 'warning' });
+          }
+        } catch (imageError) {
+          console.error('Error generating image:', imageError);
+          setAlert({ show: true, message: 'Topics generated, but image generation failed.', color: 'warning' });
+        }
       } else {
         throw new Error('Invalid response format');
       }
     } catch (error) {
       console.error('Error generating topics:', error);
       setGeneratedContent([{ topic_name: 'Error generating topics. Please try again.' }]);
+      setAlert({ show: true, message: 'Error generating topics. Please try again.', color: 'danger' });
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +80,19 @@ const GenerateTopic = () => {
         </Button>
       </Form>
       {isLoading && <div className="loader mt-4"></div>}
+      {alert.show && (
+        <Alert color={alert.color} className="mt-3">
+          {alert.message}
+        </Alert>
+      )}
+      {imageUrl && (
+        <Card className="mt-4">
+          <CardBody>
+            <CardTitle tag="h5">Generated Image</CardTitle>
+            <img src={imageUrl} alt="Generated topic icon" style={{maxWidth: '50%', height: 'auto'}} />
+          </CardBody>
+        </Card>
+      )}
       {summary && (
         <Card className="mt-4">
           <CardBody>

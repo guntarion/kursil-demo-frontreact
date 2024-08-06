@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight } from 'react-feather';
 import SidebarMenuItems from './SidebarMenuItems';
 import ConfigDB from '../../Config/Theme-Config';
-import SidebarSection from './SidebarSection';
+// import SidebarSection from './SidebarSection';
 
 const SidebarMenu = ({ setMainMenu, props, sidebartoogle, setNavActive, width }) => {
   const [rightArrow, setRightArrow] = useState(false);
@@ -50,7 +50,7 @@ const SidebarMenu = ({ setMainMenu, props, sidebartoogle, setNavActive, width })
               : { margin: '0px' }
           }>
           <SidebarMenuItems setMainMenu={setMainMenu} props={props} sidebartoogle={sidebartoogle} setNavActive={setNavActive} />
-          <SidebarSection />
+          {/* <SidebarSection /> */}
         </div>
         <div className={`right-arrow ${rightArrow ? 'd-none' : ''}`} onClick={scrollToRight}>
           <ArrowRight />
