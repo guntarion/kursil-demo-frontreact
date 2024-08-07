@@ -1,13 +1,12 @@
 {
   "files": {
-    "main.css": "/static/css/main.94cc6bb9.css",
-    "main.js": "/static/js/main.96fabfe3.js",
+    "main.css": "/static/css/main.90f93fbc.css",
+    "main.js": "/static/js/main.be49e31a.js",
     "static/js/453.48ef26b5.chunk.js": "/static/js/453.48ef26b5.chunk.js",
     "static/media/icofont.svg?v=1.0.0-beta": "/static/media/icofont.71b6e64530b59aa74760.svg",
     "static/media/icofont.eot?v=1.0.0-beta": "/static/media/icofont.556fa8050e7e3b9a829d.eot",
     "static/media/icofont.ttf?v=1.0.0-beta": "/static/media/icofont.dae25655dd28a58eb576.ttf",
     "static/media/icofont.woff?v=1.0.0-beta": "/static/media/icofont.c2bb62e2c5c6870a5cb5.woff",
-    "static/media/product-4.png": "/static/media/product-4.cb07003ba7dc7875bc43.png",
     "static/media/calender-bg.png": "/static/media/calender-bg.b389510c43d803766ea6.png",
     "static/media/do.svg": "/static/media/do.b9b509413af90ea6f577.svg",
     "static/media/fontawesome-webfont.svg?v=4.7.0": "/static/media/fontawesome-webfont.c1e38fd9e0e74ba58f7a.svg",
@@ -62,19 +61,16 @@
     "static/media/sx.svg": "/static/media/sx.4c1191e8b14455ea4c37.svg",
     "static/media/tc.svg": "/static/media/tc.ff2766b3075c3d42c445.svg",
     "static/media/lk.svg": "/static/media/lk.e31bd4522b8de69169ab.svg",
-    "static/media/1.jpg": "/static/media/1.2d8ac3eda6c94b1c215e.jpg",
     "static/media/kz.svg": "/static/media/kz.0b7cc5e4ae1cd812cb22.svg",
     "static/media/firebase.svg": "/static/media/firebase.a7e42fad77668060fa5b5e7282c4f0b9.svg",
     "static/media/eg.svg": "/static/media/eg.cc70ccd77020873ecbb9.svg",
     "static/media/sa.svg": "/static/media/sa.04d0731eccf0867160fe.svg",
-    "static/media/product-6.jpg": "/static/media/product-6.902e072bfedc4a1cabdf.jpg",
     "static/media/pn.svg": "/static/media/pn.3a7ee56fbb32fb452408.svg",
     "static/media/im.svg": "/static/media/im.d70438cbae06b6ff5aac.svg",
     "static/media/aw.svg": "/static/media/aw.de558b83521f73d7337e.svg",
     "static/media/md.svg": "/static/media/md.a829fc4868897053147b.svg",
     "static/media/gb-wls.svg": "/static/media/gb-wls.9c138db83115bbf972fe.svg",
     "static/media/mt.svg": "/static/media/mt.8bb217f8dbf3757be544.svg",
-    "static/media/side-bar.png": "/static/media/side-bar.d5d43e1c61d94f3aa652.png",
     "static/media/br.svg": "/static/media/br.ed4137cfd44daa13ea49.svg",
     "static/media/li.svg": "/static/media/li.67956510ad59f57af330.svg",
     "static/media/pt.svg": "/static/media/pt.a0d9acfb1c2a4e986423.svg",
@@ -292,12 +288,12 @@
     "static/media/bd.svg": "/static/media/bd.7a30395b2f93bfd130e1.svg",
     "static/media/hour.svg": "/static/media/hour.6548bc0623d611d7572e.svg",
     "static/media/min.svg": "/static/media/min.adcdc23489f6d03ca8b6.svg",
-    "main.94cc6bb9.css.map": "/static/css/main.94cc6bb9.css.map",
-    "main.96fabfe3.js.map": "/static/js/main.96fabfe3.js.map",
+    "main.90f93fbc.css.map": "/static/css/main.90f93fbc.css.map",
+    "main.be49e31a.js.map": "/static/js/main.be49e31a.js.map",
     "453.48ef26b5.chunk.js.map": "/static/js/453.48ef26b5.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.94cc6bb9.css",
-    "static/js/main.96fabfe3.js"
+    "static/css/main.90f93fbc.css",
+    "static/js/main.be49e31a.js"
   ]
 }
