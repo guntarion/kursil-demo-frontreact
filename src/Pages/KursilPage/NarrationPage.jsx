@@ -13,7 +13,15 @@ const NarrationPage = () => {
           <Col sm="12">
             <Card>
               <CardBody>
-              NarrationPage
+              <strong>Fitur Powerspeak:</strong>
+              <ul>
+                <li>Membuat narasi bicara presentasi dalam durasi sesuai arahan</li>
+                <li>Merekomendasikan gestur bicara sesuai hasil narasi</li>
+                <li>Sampling audio narasi dari narasi bicara</li>
+                <li>Membuat pertanyaan dan bahan diskusi</li>
+                <li>Membuat studi kasus dari topik yang diberikan</li>
+                <li>Membuat call to action dari topik yang diberikan</li>
+              </ul>
               </CardBody>
             </Card>
           </Col>
