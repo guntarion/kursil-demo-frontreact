@@ -11,11 +11,13 @@ const DEFAULT_IMAGE = 'https://bucket-titianbakat-ai-project.sgp1.cdn.digitaloce
 const MainTopicPage = () => {
   const [mainTopics, setMainTopics] = useState([]);
 
+  const API_URL = process.env.REACT_APP_API_URL || 'https://powerspeak.id/api';
+
   useEffect(() => {
     const fetchMainTopics = async () => {
-      console.log("API URL:", process.env.REACT_APP_API_URL);
+      console.log("API URL:", API_URL);
       try {
-        const url = `${process.env.REACT_APP_API_URL}/main-topics/`;
+        const url = `${API_URL}/main-topics/`;
         console.log("Fetching from:", url);
         const response = await axios.get(url);
         console.log("Response:", response.data);
