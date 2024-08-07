@@ -13,8 +13,12 @@ const MainTopicPage = () => {
 
   useEffect(() => {
     const fetchMainTopics = async () => {
+      console.log("API URL:", process.env.REACT_APP_API_URL);
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/main-topics/`);
+        const url = `${process.env.REACT_APP_API_URL}/main-topics/`;
+        console.log("Fetching from:", url);
+        const response = await axios.get(url);
+        console.log("Response:", response.data);
         setMainTopics(response.data);
       } catch (error) {
         console.error('Error fetching main topics:', error);
