@@ -10,10 +10,17 @@ const SamplePageContain = () => {
             <Col sm="12">
               <Card>
                 <CardHeader className="pb-0">
-                  <H5>Sample Card</H5><span>lorem ipsum dolor sit amet, consectetur adipisicing elit</span>
+                  <H5>Kurikulum Silabus PLN Pusdiklat</H5><span>Generate dari KnowledgeBase OpenAI</span>
                 </CardHeader>
                 <CardBody>
-                  <P>"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</P>
+                  <P>Kurikulum dan Silabus PLN Pusdiklat</P>
+                  Perihal yang dihasilkan:
+                  <ul>
+                  <li>Kurikulum Silabus yang dapat di-generate secara relatif singkat dengan biaya relatif lebih murah.</li>
+                  <li>Kurikulum yang lebih relevan, terupdate, tujuan belajar yang benar-benar cerminan dari materi riil, estimasi waktu yang lebih akurat.</li>
+                  <li>Silabus dengan struktur yang jelas, mencakup tujuan pembelajaran, materi, metode pengajaran, dan metode penilaian yang sudah tersusun jelas, “tinggal pakai”. </li>
+                  <li>Handout, quiz, arahan diskusi untuk pegangan pelaksana training.</li>
+                  </ul>
                 </CardBody>
               </Card>
             </Col>
